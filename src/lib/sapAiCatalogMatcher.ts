@@ -193,7 +193,7 @@ function buildSapAgentMatch(
     monthlyAiuEstimated: Math.round(monthlyCu * 10) / 10,
     monthlyCostEurEstimated: Math.round(monthlyEur * 10) / 10,
     isBillable: cuRatePerTx > 0,
-    discoveryCenterUrl: `https://discovery-center.cloud.sap/ai-catalog/?id=${item.id}`,
+    discoveryCenterUrl: `https://discovery-center.cloud.sap/ai-catalog/?search=${encodeURIComponent(item.name)}`,
     jarvisId: item.jarvisId,
     isGap: false,
   };
@@ -404,7 +404,7 @@ export function findProcessAssistant(
     monthlyAiuEstimated: 0,
     monthlyCostEurEstimated: 0,
     isBillable: false,
-    discoveryCenterUrl: `https://discovery-center.cloud.sap/ai-catalog/?id=${rawItem.id}`,
+    discoveryCenterUrl: `https://discovery-center.cloud.sap/ai-catalog/?search=${encodeURIComponent(rawItem.name)}`,
     isGap: false,
   };
 }
