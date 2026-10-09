@@ -60,6 +60,13 @@ export const LivePayloadMonitor: React.FC = () => {
 
   const t = TRANSLATIONS[language];
 
+  // Wenn eine Box aufgemacht wurde (Schritt-Info oder Qualitäts-Scorecard),
+  // bleibt sie beim Springen zwischen Steps offen!
+  // Sie schließt sich nur bei explizitem Wechsel des Layers oben.
+  useEffect(() => {
+    setIsQualityOpen(false);
+  }, [activeWorkflowLayer]);
+
   // Wenn Gesamtprozess & Bilanz ausgewählt ist (und nicht gerade eine Simulation live über Steps läuft)
   if (selectedStepId === 'process_summary' && !isSimulating) {
     return <ProcessSummaryView />;
@@ -96,13 +103,6 @@ export const LivePayloadMonitor: React.FC = () => {
   const archetypeComparisons = currentStep
     ? calculateStepArchetypeComparison(currentStep, config, language)
     : [];
-
-  // Wenn eine Box aufgemacht wurde (Schritt-Info oder Qualitäts-Scorecard),
-  // bleibt sie beim Springen zwischen Steps offen!
-  // Sie schließt sich nur bei explizitem Wechsel des Layers oben.
-  useEffect(() => {
-    setIsQualityOpen(false);
-  }, [activeWorkflowLayer]);
 
   // Formatierungshilfe für strukturierte Payloads (Tabellen, Arrays, Strings, Zahlen)
   const renderFormattedValue = (val: any) => {
