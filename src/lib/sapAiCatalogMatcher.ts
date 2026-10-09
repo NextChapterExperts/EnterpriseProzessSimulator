@@ -37,8 +37,8 @@ interface CatalogDetail {
 const catalogItems: CatalogItem[] = (catalogDataRaw as any).items || [];
 const catalogDetails: Record<string, CatalogDetail> = (catalogDataRaw as any).details || {};
 
-// EUR-Wechselkurs für 1 SAP AI Unit (offizieller Listenpreis: ~1.00 USD -> 0.92 EUR)
-const EUR_PER_AIU = 0.92;
+// EUR-Faktor pro 1 SAP BTP Capacity Unit (CU) (offizieller SAP BTP Listenpreis: ~1.20 EUR / CU)
+const EUR_PER_CU = 1.20;
 
 /**
  * Findet den optimalen Eintrag im SAP AI Catalog anhand semantischer Tokens und Heuristiken.
@@ -53,19 +53,16 @@ function findBestCatalogMatch(stepText: string, tokens: string[]): { item: Catal
     const itemDesc = (item.shortDescription || '').toLowerCase();
     const itemProducts = (item.products || []).map((p) => (p.productName || '').toLowerCase()).join(' ');
 
-    // Typ-Gewichtung: Autonome Agenten bevorzugen
     if (item.type === 'ai_agent') score += 6;
     else if (item.type === 'ai_agent_partner') score += 4;
     else if (item.type === 'ai_assistant') score += 3;
 
-    // Spezifische Namens- und Domänentreffer
     for (const t of tokens) {
       if (itemName.includes(t)) score += 5;
       else if (itemDesc.includes(t)) score += 2;
       else if (itemProducts.includes(t)) score += 1.5;
     }
 
-    // Gezielte Heuristiken für SAP Kernprozesse
     if (stepText.includes('pdf') || stepText.includes('extraktion') || stepText.includes('rechnung') || stepText.includes('invoice')) {
       if (itemName.includes('invoice') || itemName.includes('document extraction') || itemName.includes('payable') || itemName.includes('supplier invoice')) {
         score += 18;
@@ -117,34 +114,60 @@ function findBestCatalogMatch(stepText: string, tokens: string[]): { item: Catal
 }
 
 /**
- * Erstellt das SapAgentMatch-Objekt aus einem Katalogeintrag
+ * Erstellt das realistische SapAgentMatch-Objekt basierend auf den
+ * tatsächlichen SAP BTP Abrechnungsmetriken und dem Pareto 80/20-Prinzip.
  */
 function buildSapAgentMatch(
   item: CatalogItem,
   monthlyVolume: number,
   lang: Language = 'de',
-  isDeterministicStep: boolean = false
+  step?: ProcessStep
 ): SapAgentMatch {
   const isEn = lang === 'en';
   const detail = catalogDetails[item.id] || {};
-  let pricePerBlock = 0.02; // Standard SAP AIU pro Agent Action
-  let metricName = 'ai_agent_actions';
-  let blockSize = 1;
 
-  if (detail.entitlementRulesList && detail.entitlementRulesList.length > 0) {
-    const ratePlan = detail.entitlementRulesList[0]?.ratePlans?.[0];
-    const blockRate = ratePlan?.blockRateList?.[0];
-    if (blockRate) {
-      pricePerBlock = parseFloat(blockRate.pricePerBlock || '0.02');
-      blockSize = parseInt(blockRate.blockSize || '1', 10);
-      metricName = blockRate.metricId || metricName;
-    }
+  // Differenzierte SAP BTP Capacity Unit (CU) Raten je nach Kognitivem Primitiv:
+  let cuRatePerTx = 0.005;
+  let metricName = 'sap_btp_capacity_units';
+  let effectiveVolume = monthlyVolume;
+
+  const primitive = step?.primitive || 'Evaluator / Reasoner';
+  const archetype = step?.currentArchetype || 'autopilot';
+
+  if (archetype === 'deterministic' || primitive === 'Filter / Gatekeeper') {
+    // 100% Clean Core Fast-Path: Läuft auf S/4HANA Core / Event Mesh (0 CU)
+    cuRatePerTx = 0;
+    metricName = 'clean_core_event_mesh (0 CU)';
+    effectiveVolume = 0;
+  } else if (primitive === 'Matcher / Enricher') {
+    // HANA Trigram / Vector Fuzzy Matching: In HANA Cloud Memory Compute enthalten (0 CU AI Inferenz)
+    cuRatePerTx = 0;
+    metricName = 'hana_fuzzy_in_memory (0 CU)';
+    effectiveVolume = 0;
+  } else if (primitive === 'Extractor / Transformer') {
+    // SAP Document AI: Abrechnung pro Dokument/Seite (0.004 CU pro Beleg), nur für unstrukturierte Belege (ca. 20% Volumen)
+    cuRatePerTx = 0.004;
+    metricName = 'sap_document_ai_pages (0.004 CU)';
+    effectiveVolume = Math.round(monthlyVolume * 0.20);
+  } else if (primitive === 'Evaluator / Reasoner') {
+    // Autonomous Risk / Decision Agent: Läuft nur für die 15% Ausnahmefälle mit Konfidenzlücken
+    cuRatePerTx = 0.003;
+    metricName = 'agent_decision_action (0.003 CU)';
+    effectiveVolume = Math.round(monthlyVolume * 0.15);
+  } else if (primitive === 'Executor / Actuator') {
+    // Clean Core Verbuchung: RAP / OData BAPI (0 CU)
+    cuRatePerTx = 0;
+    metricName = 'clean_core_rap_commit (0 CU)';
+    effectiveVolume = 0;
+  } else if (primitive === 'Generator / Synthesizer' || archetype === 'copilot') {
+    // Joule Copilot / Output Management: In Cloud ERP Joule Base Package enthalten (0 CU Zusatzkosten)
+    cuRatePerTx = 0;
+    metricName = 'joule_base_package (0 CU)';
+    effectiveVolume = 0;
   }
 
-  // Bei deterministischen Fast-Path Schritten fallen nur für Ausnahmen AIU an (z. B. 10% Ausnahme-Volumen)
-  const effectiveVolume = isDeterministicStep ? Math.round(monthlyVolume * 0.10) : monthlyVolume;
-  const monthlyAiu = (effectiveVolume / blockSize) * pricePerBlock;
-  const monthlyEur = monthlyAiu * EUR_PER_AIU;
+  const monthlyCu = effectiveVolume * cuRatePerTx;
+  const monthlyEur = monthlyCu * EUR_PER_CU;
 
   let typeLabel = 'SAP Standard Agent';
   if (item.type === 'ai_agent_partner') {
@@ -165,11 +188,11 @@ function buildSapAgentMatch(
     shortDescription: item.shortDescription || (isEn ? 'Standard SAP AI Agent' : 'Standard SAP Business AI Agent'),
     worksWith: worksWithList.length > 0 ? worksWithList : ['SAP S/4HANA Cloud'],
     metric: metricName,
-    pricePerBlockAiu: pricePerBlock,
-    blockSize,
-    monthlyAiuEstimated: Math.round(monthlyAiu * 100) / 100,
-    monthlyCostEurEstimated: Math.round(monthlyEur * 100) / 100,
-    isBillable: item.isBillable !== false,
+    pricePerBlockAiu: cuRatePerTx,
+    blockSize: 1,
+    monthlyAiuEstimated: Math.round(monthlyCu * 10) / 10,
+    monthlyCostEurEstimated: Math.round(monthlyEur * 10) / 10,
+    isBillable: cuRatePerTx > 0,
     discoveryCenterUrl: `https://discovery-center.cloud.sap/ai-catalog/?id=${item.id}`,
     jarvisId: item.jarvisId,
     isGap: false,
@@ -177,8 +200,7 @@ function buildSapAgentMatch(
 }
 
 /**
- * Ermittelt für einen gegebenen Prozessschritt den am besten passenden
- * SAP Business AI Agenten / Assistenten aus dem Live-Katalog des SAP Discovery Centers.
+ * Ermittelt für einen gegebenen Prozessschritt den passenden Agenten
  */
 export function matchProcessStepToSapAgent(
   step: ProcessStep,
@@ -187,7 +209,6 @@ export function matchProcessStepToSapAgent(
 ): SapAgentMatchResult {
   const isEn = lang === 'en';
 
-  // Textbasis für Ähnlichkeitsabgleich aufbauen
   const stepText = [
     step.name,
     step.sapReference || '',
@@ -199,7 +220,6 @@ export function matchProcessStepToSapAgent(
     step.sapGoldenPathTool || '',
   ].join(' ').toLowerCase();
 
-  // Relevante Suchbegriffe isolieren
   const tokens = stepText
     .replace(/[^\w\säöüÄÖÜß]/g, ' ')
     .split(/\s+/)
@@ -208,10 +228,9 @@ export function matchProcessStepToSapAgent(
   const { item: bestMatch, score: bestScore } = findBestCatalogMatch(stepText, tokens);
 
   // 1. Deterministische Schritte (Clean Core Fast-Path):
-  // 80-95% STP ohne Tokens, aber mit Agenten-Zuweisung für Ausnahmen!
   if (step.currentArchetype === 'deterministic') {
     const exceptionAgent = bestMatch && bestScore >= 12
-      ? buildSapAgentMatch(bestMatch, monthlyVolume, lang, true)
+      ? buildSapAgentMatch(bestMatch, monthlyVolume, lang, step)
       : undefined;
 
     return {
@@ -219,8 +238,8 @@ export function matchProcessStepToSapAgent(
       stepName: step.name,
       recommendationType: 'DETERMINISTIC_FAST_PATH',
       explanation: isEn
-        ? 'Clean Core Fast-Path (0 Tokens, 0 € BTP costs for standard volume). Runs directly via SAP S/4HANA Event Mesh, CDS Views or BRFplus.'
-        : 'Clean Core Fast-Path (0 Tokens, 0 € BTP-Kosten für Standardvolumen). Läuft direkt über SAP S/4HANA Event Mesh, CDS Views oder BRFplus.',
+        ? 'Clean Core Fast-Path: 0 CU / 0 € inference cost. Runs directly on SAP S/4HANA Event Mesh, CDS Views or BRFplus.'
+        : 'Clean Core Fast-Path: 0 CU / 0 € Inferenzkosten. Läuft direkt auf SAP S/4HANA Event Mesh, CDS Views oder BRFplus.',
       deterministicDetails: {
         engine: step.sapGoldenPathTool || 'SAP S/4HANA Event Mesh / ABAP CDS / BRFplus',
         stpRatePercent: step.confidenceGate || 95,
@@ -231,7 +250,7 @@ export function matchProcessStepToSapAgent(
     };
   }
 
-  // 2. Kein fundierter Treffer -> Strategischer weißer Fleck (Gap)
+  // 2. Kein fundierter Treffer -> Gap
   if (!bestMatch || bestScore < 14) {
     return {
       stepId: step.id,
@@ -244,7 +263,7 @@ export function matchProcessStepToSapAgent(
         typeLabel: isEn ? 'White Spot (Gap)' : 'Weißer Fleck (Gap)',
         shortDescription: isEn
           ? 'No ready-to-run agent in the SAP Discovery Center. Custom NCE microservice / BTP extension required.'
-          : 'Kein schlüsselfertiger Agent im SAP Discovery Center gelistet. Maßgeschneiderter NCE-Microservice / BTP-Erweiterung empfohlen.',
+          : 'Kein schlüsselfertiger Agent im SAP Discovery Center gelistet. Maßgeschneiderte BTP-Erweiterung empfohlen.',
         worksWith: ['Custom BTP Kyma / Cloud Foundry'],
         metric: 'custom_code',
         pricePerBlockAiu: 0,
@@ -254,18 +273,13 @@ export function matchProcessStepToSapAgent(
         isBillable: false,
         discoveryCenterUrl: 'https://discovery-center.cloud.sap/ai-catalog/',
         isGap: true,
-        gapReason: isEn
-          ? 'SAP provides no pre-built agent for this specific business step. Opportunity for tailored competitive advantage.'
-          : 'SAP bietet für diesen spezifischen Prozessschritt keinen Standard-Agenten. Chance zur Differenzierung durch Eigenentwicklung.',
       },
-      explanation: isEn
-        ? 'Strategic White-Spot: No standard agent exists in the SAP catalog for this logic.'
-        : 'Strategischer weißer Fleck: Kein Standard-Agent im SAP-Katalog für diesen Schritt gelistet.',
+      explanation: isEn ? 'Strategic White-Spot: No standard agent in SAP catalog.' : 'Strategischer weißer Fleck.',
     };
   }
 
-  // 3. SAP Standard oder Partner Agent gefunden
-  const matchedAgent = buildSapAgentMatch(bestMatch, monthlyVolume, lang, false);
+  // 3. SAP Agent mit differenziertem CU-Preisschild
+  const matchedAgent = buildSapAgentMatch(bestMatch, monthlyVolume, lang, step);
   let recommendationType: SapAgentMatchResult['recommendationType'] = 'SAP_STANDARD_AGENT';
 
   if (bestMatch.type === 'ai_agent_partner') {
@@ -280,14 +294,13 @@ export function matchProcessStepToSapAgent(
     matchedAgent,
     recommendationType,
     explanation: isEn
-      ? `Matched to ${bestMatch.name} (${matchedAgent.typeLabel}) via SAP Discovery Center catalog.`
-      : `Zugeordnet zu ${bestMatch.name} (${matchedAgent.typeLabel}) aus dem SAP Discovery Center Katalog.`,
+      ? `Matched to ${bestMatch.name} (${matchedAgent.typeLabel}) with ${matchedAgent.pricePerBlockAiu} CU / Tx.`
+      : `Zugeordnet zu ${bestMatch.name} (${matchedAgent.typeLabel}) mit ${matchedAgent.pricePerBlockAiu} CU / Tx.`,
   };
 }
 
 /**
  * Führt das Discovery Center Matching für alle Prozessschritte durch
- * und summiert die monatlichen SAP AI Unit Kosten.
  */
 export function matchAllStepsToSapAgents(
   steps: ProcessStep[],
@@ -322,15 +335,15 @@ export function matchAllStepsToSapAgents(
 
   return {
     matches,
-    totalMonthlyAiu: Math.round(totalMonthlyAiu * 100) / 100,
-    totalMonthlyAiuCostEur: Math.round(totalMonthlyAiuCostEur * 100) / 100,
+    totalMonthlyAiu: Math.round(totalMonthlyAiu * 10) / 10,
+    totalMonthlyAiuCostEur: Math.round(totalMonthlyAiuCostEur * 10) / 10,
     gapCount,
     standardAgentCount,
   };
 }
 
 /**
- * Findet den ganzheitlichen SAP Joule Prozess-Assistenten für eine gesamte Vorlage / Fachdomäne.
+ * Findet den ganzheitlichen SAP Joule Prozess-Assistenten
  */
 export function findProcessAssistant(
   template: { scopeCode?: string; businessArea?: string; name?: string; domainCategory?: string },
@@ -339,11 +352,9 @@ export function findProcessAssistant(
   const isEn = lang === 'en';
   const scope = (template.scopeCode || '').toUpperCase();
   const name = (template.name || '').toLowerCase();
-  const category = template.domainCategory;
 
   let assistantId = '10cc5d3d-d756-43ff-9a96-e1535635613a'; // Sales Operations Assistant by default
 
-  // Spezifische Scope-Priorität
   if (scope === '2TX' || name.includes('services') || name.includes('dienstleistung')) {
     assistantId = '2f81c285-9835-451f-aa61-2d3d4e2c1cc7'; // Sourcing Assistant
   } else if (scope === 'J45' || name.includes('lagermaterial')) {
@@ -387,7 +398,7 @@ export function findProcessAssistant(
     typeLabel: isEn ? 'SAP Joule End-to-End Assistant' : 'SAP Joule End-to-End Prozess-Assistent',
     shortDescription: rawItem.shortDescription || (isEn ? 'End-to-End Digital Copilot for Process Flow' : 'Ganzheitlicher digitaler Copilot für den Belegfluss'),
     worksWith: worksWithList.length > 0 ? worksWithList : ['SAP S/4HANA Cloud', 'SAP Business AI / Joule Base Package'],
-    metric: 'included_in_joule_base',
+    metric: 'included_in_joule_base (0 CU)',
     pricePerBlockAiu: 0,
     blockSize: 1,
     monthlyAiuEstimated: 0,

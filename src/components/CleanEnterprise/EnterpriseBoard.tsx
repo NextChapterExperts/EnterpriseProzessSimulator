@@ -162,11 +162,16 @@ export const EnterpriseBoard: React.FC = () => {
   const deterministicSteps = steps.filter((s) => s.currentArchetype === 'deterministic').length;
   const stpRate = totalSteps > 0 ? Math.round((deterministicSteps / totalSteps) * 100) : 80;
 
-  const totalAiu = steps.reduce(
-    (acc, s) => acc + (s.sapAgentMatch?.matchedAgent?.monthlyAiuEstimated || 0),
-    0
-  );
-  const totalEur = Math.round(totalAiu * 0.92);
+  const totalCu = Math.round(
+    steps.reduce(
+      (acc, s) => acc + (s.sapAgentMatch?.matchedAgent?.monthlyAiuEstimated || 0),
+      0
+    ) * 10
+  ) / 10;
+  const totalEur = Math.round(totalCu * 1.20 * 100) / 100;
+  // Naive Baseline: Unoptimiert 0.02 CU je Schritt über gesamtes Volumen
+  const unoptimizedCu = Math.round((config.monthlyVolume * Math.max(1, steps.length - 1) * 0.02) * 10) / 10;
+  const unoptimizedEur = Math.round(unoptimizedCu * 1.20);
 
   return (
     <div className="flex-1 flex flex-col h-screen w-screen bg-[#070c18] text-slate-100 overflow-hidden font-sans select-none">
@@ -322,9 +327,12 @@ export const EnterpriseBoard: React.FC = () => {
         <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 flex items-center space-x-3">
           <Coins className="w-5 h-5 text-indigo-400" />
           <div>
-            <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">BTP Inferenz-Kosten</div>
+            <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">BTP Capacity Units (CU)</div>
             <div className="text-sm font-bold text-indigo-400 font-mono">
-              {totalEur} € / Monat ({totalAiu.toFixed(1)} AIU)
+              {totalCu.toFixed(1)} CU / Monat
+            </div>
+            <div className="text-[9.5px] font-mono text-slate-400">
+              ~{totalEur.toFixed(2)} € (statt {unoptimizedCu.toFixed(0)} CU ohne Pareto)
             </div>
           </div>
         </div>
@@ -716,10 +724,10 @@ export const EnterpriseBoard: React.FC = () => {
                             ) : match ? (
                               <div className="space-y-0.5">
                                 <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-sky-950 text-sky-300 border border-sky-800 font-mono">
-                                  {match.monthlyCostEurEstimated.toFixed(2)} € / M.
+                                  {match.monthlyAiuEstimated.toFixed(1)} CU (~{match.monthlyCostEurEstimated.toFixed(2)} €)
                                 </span>
                                 <div className="text-[9.5px] text-slate-500 font-mono">
-                                  {match.pricePerBlockAiu} AIU / Aktion
+                                  {match.pricePerBlockAiu > 0 ? `${match.pricePerBlockAiu} CU / Tx` : '0 CU (HANA/Core)'}
                                 </div>
                               </div>
                             ) : (
@@ -733,12 +741,20 @@ export const EnterpriseBoard: React.FC = () => {
                     })}
                   </div>
 
-                  {/* Kosten-Gesamtsumme */}
-                  <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-xs font-mono">
-                    <span className="text-slate-400">Gesamt-Preisschild aller Agenten:</span>
-                    <span className="text-emerald-400 font-bold text-sm">
-                      {totalEur} € / Monat ({totalAiu.toFixed(1)} AIU)
-                    </span>
+                  {/* Kosten-Gesamtsumme & Pareto-Vergleich */}
+                  <div className="pt-2 border-t border-slate-800 space-y-1 text-xs font-mono">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Pareto BTP-Preisschild:</span>
+                      <span className="text-emerald-400 font-bold text-sm">
+                        {totalCu.toFixed(1)} CU (~{totalEur.toFixed(2)} € / Monat)
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10.5px] text-slate-500 pt-0.5 border-t border-slate-800/60">
+                      <span>Ohne Pareto (sture GenAI-Kette):</span>
+                      <span className="text-red-400 font-semibold line-through">
+                        {unoptimizedCu.toFixed(0)} CU (~{unoptimizedEur} € / Monat)
+                      </span>
+                    </div>
                   </div>
                 </div>
 
