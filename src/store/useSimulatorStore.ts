@@ -128,6 +128,15 @@ interface SimulatorState {
   stepSimulationForward: () => void;
   resetSimulation: () => void;
   setSimulationSpeed: (speedMs: number) => void;
+
+  // AI Conversational Advisor Actions
+  applyGeneratedProcess: (
+    title: string,
+    scopeCode: string,
+    steps: ProcessStep[],
+    monthlyVolume: number,
+    executiveSummary?: string
+  ) => void;
 }
 
 const initialTemplate = PROCESS_TEMPLATES[0];
@@ -811,5 +820,42 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       get().pauseSimulation();
       get().startSimulation();
     }
+  },
+
+  applyGeneratedProcess: (title, scopeCode, generatedSteps, monthlyVolume, executiveSummary) => {
+    const config = { ...get().config, monthlyVolume };
+    const enrichedSteps = enrichStepsWithSapAgents(generatedSteps, monthlyVolume, get().language);
+    const newMetrics = calculateOverallMetrics(enrichedSteps, config);
+    const newTemplate: ProcessTemplate = {
+      id: `ai_${Date.now()}`,
+      name: title,
+      scopeCode: scopeCode,
+      businessArea: 'Enterprise AI Target Architecture',
+      description: executiveSummary || 'KI-generierter Pareto-optimaler SAP-Zielprozess',
+      steps: enrichedSteps,
+    };
+    const newDryRun = DryRunEngine.execute(
+      enrichedSteps,
+      newTemplate.id,
+      'good',
+      null,
+      null,
+      null,
+      get().language
+    );
+
+    // Automatisches Pareto-Ergebnis für das Modal berechnen
+    const paretoResult = ParetoSolver.solve(enrichedSteps, config, get().language);
+
+    set({
+      currentTemplate: newTemplate,
+      steps: paretoResult.optimizedSteps,
+      config,
+      metrics: newMetrics,
+      selectedStepId: paretoResult.optimizedSteps[0]?.id || null,
+      dryRunResult: newDryRun,
+      lastParetoResult: paretoResult,
+      simulationStatusText: `✓ KI-Zielarchitektur "${title}" im Pareto-Optimum generiert.`,
+    });
   },
 }));
