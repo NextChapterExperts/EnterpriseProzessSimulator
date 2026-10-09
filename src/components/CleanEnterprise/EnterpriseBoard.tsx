@@ -659,6 +659,89 @@ export const EnterpriseBoard: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Zuarbeitende Spezial-Agenten & Preisschilder (Worker Agents) */}
+                <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 space-y-3 text-xs">
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-800">
+                    <div className="flex items-center space-x-1.5">
+                      <Bot className="w-3.5 h-3.5 text-sky-400" />
+                      <h4 className="font-bold text-white text-[11px] uppercase tracking-wider font-mono">
+                        Zuarbeitende Spezial-Agenten &amp; Preisschilder
+                      </h4>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      {steps.length} Schritte
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {steps.map((s, i) => {
+                      const isStp = s.currentArchetype === 'deterministic';
+                      const match = s.sapAgentMatch?.matchedAgent;
+                      return (
+                        <div
+                          key={s.id}
+                          className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800/80 flex items-center justify-between"
+                        >
+                          <div className="space-y-0.5">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-[10px] font-mono font-bold text-slate-400">
+                                #{i + 1}
+                              </span>
+                              <span className="text-xs font-semibold text-slate-200">
+                                {s.name}
+                              </span>
+                            </div>
+                            <div className="text-[10.5px] text-slate-400 pl-4 font-mono">
+                              {isStp ? (
+                                <span className="text-emerald-400">
+                                  Clean Core Fast-Path ({s.sapGoldenPathTool || 'BRFplus / CDS'})
+                                </span>
+                              ) : match ? (
+                                <span className="text-sky-300">
+                                  {match.name}
+                                </span>
+                              ) : (
+                                <span className="text-amber-400">
+                                  Maßgeschneiderte BTP Extension
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            {isStp ? (
+                              <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono">
+                                0,00 € (STP)
+                              </span>
+                            ) : match ? (
+                              <div className="space-y-0.5">
+                                <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-sky-950 text-sky-300 border border-sky-800 font-mono">
+                                  {match.monthlyCostEurEstimated.toFixed(2)} € / M.
+                                </span>
+                                <div className="text-[9.5px] text-slate-500 font-mono">
+                                  {match.pricePerBlockAiu} AIU / Aktion
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-amber-950 text-amber-300 border border-amber-800 font-mono">
+                                Custom BTP
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Kosten-Gesamtsumme */}
+                  <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-xs font-mono">
+                    <span className="text-slate-400">Gesamt-Preisschild aller Agenten:</span>
+                    <span className="text-emerald-400 font-bold text-sm">
+                      {totalEur} € / Monat ({totalAiu.toFixed(1)} AIU)
+                    </span>
+                  </div>
+                </div>
+
                 {/* Discovery Center Link */}
                 <div className="pt-2">
                   <a

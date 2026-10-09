@@ -343,16 +343,19 @@ export function findProcessAssistant(
 
   let assistantId = '10cc5d3d-d756-43ff-9a96-e1535635613a'; // Sales Operations Assistant by default
 
-  if (category === 'O2C' || scope === 'BD9' || scope === 'BD3' || scope === '1EZ' || name.includes('order') || name.includes('auftrag')) {
-    if (name.includes('billing') || name.includes('faktura') || scope === '1EZ') {
-      assistantId = 'c2af7b30-3f8b-4651-b63b-3f193d0dc05d'; // Billing Assistant
-    } else {
-      assistantId = '10cc5d3d-d756-43ff-9a96-e1535635613a'; // Sales Operations Assistant
-    }
-  } else if (category === 'P2P' || scope === '2F1' || scope === '2B6' || name.includes('rechnung') || name.includes('invoice') || name.includes('payable')) {
-    assistantId = '1842edfd-d3f3-46c3-9154-cc7af440830f'; // Accounts Payable Assistant
-  } else if (scope === 'J45' || scope === '2TX' || scope === '1A0' || name.includes('procure') || name.includes('einkauf') || name.includes('sourcing')) {
+  // Spezifische Scope-Priorität
+  if (scope === '2TX' || name.includes('services') || name.includes('dienstleistung')) {
+    assistantId = '2f81c285-9835-451f-aa61-2d3d4e2c1cc7'; // Sourcing Assistant
+  } else if (scope === 'J45' || name.includes('lagermaterial')) {
     assistantId = 'd71c2437-3a59-4f01-86b4-2e11943df581'; // Purchasing Assistant
+  } else if (scope === '1A0' || name.includes('kontrakt') || name.includes('contract')) {
+    assistantId = '80f7a5ed-db35-4d3e-9a63-f6da027dbb79'; // Procurement Contract Assistant
+  } else if (scope === '2F1' || scope === '2B6' || name.includes('rechnung') || name.includes('invoice') || name.includes('payable')) {
+    assistantId = '1842edfd-d3f3-46c3-9154-cc7af440830f'; // Accounts Payable Assistant
+  } else if (scope === '1EZ' || name.includes('billing') || name.includes('faktura')) {
+    assistantId = 'c2af7b30-3f8b-4651-b63b-3f193d0dc05d'; // Billing Assistant
+  } else if (scope === 'BD9' || scope === 'BD3' || name.includes('order') || name.includes('auftrag')) {
+    assistantId = '10cc5d3d-d756-43ff-9a96-e1535635613a'; // Sales Operations Assistant
   } else if (scope === 'J60' || name.includes('closing') || name.includes('abschluss')) {
     assistantId = '355d68c3-f86c-4e99-afab-7283a2e6f618'; // Financial Closing Assistant
   } else if (scope === '1GA' || scope === '1VD' || name.includes('receivable') || name.includes('debitor') || name.includes('kredit')) {
@@ -365,7 +368,7 @@ export function findProcessAssistant(
     assistantId = '2b34fe18-b81e-4844-a63d-d733ca2018f2'; // Receiving Assistant
   } else if (scope === '3BW' || name.includes('logistics') || name.includes('logistik') || name.includes('outbound')) {
     assistantId = '674e9dc6-1b69-4cd2-9ed1-76b2251dabc6'; // Logistics Assistant
-  } else if (scope === 'BJ5' || scope === '1GA' || name.includes('manufacturing') || name.includes('fertigung') || name.includes('production')) {
+  } else if (scope === 'BJ5' || name.includes('manufacturing') || name.includes('fertigung') || name.includes('production')) {
     assistantId = '071c3ce4-e11b-4dd8-bfd9-180f83d4c0f8'; // Manufacturing Assistant
   } else if (scope === '1E6' || name.includes('service') || name.includes('claim') || name.includes('reklamation')) {
     assistantId = '3950afb8-8e64-4c56-8aec-7977d834ef5e'; // Case Management Assistant
