@@ -76,11 +76,14 @@ export interface ProcessStep {
   sapAgentMatch?: SapAgentMatchResult;
 }
 
+export type ProcessDomainCategory = 'O2C' | 'P2P' | 'R2R' | 'SCM' | 'ASSET_SERVICE';
+
 export interface ProcessTemplate {
   id: string;
   scopeCode: string;
   name: string;
   businessArea: string;
+  domainCategory?: ProcessDomainCategory;
   description: string;
   steps: ProcessStep[];
 }
@@ -188,4 +191,11 @@ export interface SapAgentMatchResult {
   matchedAgent?: SapAgentMatch;
   recommendationType: 'SAP_STANDARD_AGENT' | 'PARTNER_AGENT' | 'JOULE_ASSISTANT' | 'DETERMINISTIC_FAST_PATH' | 'CUSTOM_GAP';
   explanation: string;
+  deterministicDetails?: {
+    engine: string;
+    stpRatePercent: number;
+    tokenCostEur: number;
+  };
+  exceptionAgent?: SapAgentMatch;
 }
+

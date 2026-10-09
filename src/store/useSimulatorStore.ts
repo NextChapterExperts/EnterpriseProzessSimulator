@@ -283,11 +283,13 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       null,
       lang
     );
+    // Auto-Select ersten KI-Schritt (Schritt 2 falls vorhanden, sonst Schritt 1)
+    const initialSelectedStep = template.steps.length > 1 ? template.steps[1].id : template.steps[0]?.id;
     set({
       currentTemplate: template,
       steps: enrichedSteps,
       metrics: newMetrics,
-      selectedStepId: template.steps[0]?.id || null,
+      selectedStepId: initialSelectedStep || null,
       customMessageText: null,
       customSender: null,
       customSubject: null,
@@ -559,7 +561,7 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       metrics: newMetrics,
       dryRunResult: newDryRun,
       lastParetoResult: result,
-      isParetoModalOpen: true,
+      isParetoModalOpen: false,
       simulationStatusText:
         language === 'en'
           ? '★ Pareto Optimum applied: Maximized straight-through processing (STP) & minimal token consumption.'

@@ -65,35 +65,32 @@ export class ParetoSolver {
 
         case 'Extractor / Transformer':
           // 2. Observe: Extractor / Transformer
-          // Assistant (SAP DOX / Klassisches ML / LLM JSON-Mode im Hintergrund)
-          // Dunkelverarbeitung ohne manuelles Abtippen, 100% STP
-          targetArchetype = 'classic_ml';
-          targetConfidence = 92;
+          // SAP Business AI Autonomous Extraction Agent (85% STP Dunkelverarbeitung)
+          targetArchetype = 'autopilot';
+          targetConfidence = 90;
           reason = isEn
-            ? 'Assistant (SAP DOX / Classic ML background extraction): Automated straight-through extraction without manual typing (100% STP)'
-            : 'Assistant (SAP DOX / Klassisches ML im Hintergrund): Automatisierte Dunkelverarbeitung ohne manuelles Abtippen (100% STP)';
+            ? 'SAP Autonomous Extraction Agent: Ingestion & field extraction via SAP Document AI (85% STP)'
+            : 'Autonomer SAP Extraktions-Agent: Strukturierte Belegextraktion via SAP Document AI (85% STP)';
           break;
 
         case 'Matcher / Enricher':
           // 3. Orient: Matcher / Enricher
-          // SAP HANA Trigram & Fuzzy Search gegen KNA1/MARA/KNMT
-          // < 70ms Latenz, 0 CU Inferenz, Null Halluzinationsrisiko
-          targetArchetype = 'classic_ml';
-          targetConfidence = 95;
+          // SAP Autonomous Matching Agent
+          targetArchetype = 'autopilot';
+          targetConfidence = 92;
           reason = isEn
-            ? 'SAP HANA Trigram & Fuzzy Search: Sub-millisecond master data reconciliation (0 CU inference, zero hallucination risk)'
-            : 'SAP HANA Trigram & Fuzzy Search: Fehlertoleranter Stammdaten-Abgleich im Millisekundenbereich (0 CU Inferenz, Null Halluzinationsrisiko)';
+            ? 'SAP Autonomous Matching Agent: In-memory entity resolution & master data reconciliation'
+            : 'Autonomer SAP Matching-Agent: Stammdatenabgleich & Entitätsauflösung via HANA Cloud Vector/Fuzzy Engine';
           break;
 
         case 'Evaluator / Reasoner':
           // 4. Decide: Evaluator / Reasoner
-          // SAP BRFplus / Decision Tables / Credit Management
-          // 100% rechtssichere, deterministische Regelausführung, 0 CU Inferenz
-          targetArchetype = 'deterministic';
-          targetConfidence = 99;
+          // SAP Autonomous Evaluation & Risk Scoring Agent
+          targetArchetype = 'autopilot';
+          targetConfidence = 92;
           reason = isEn
-            ? 'SAP BRFplus Decision Tables: 100% audit-proof deterministic business rules execution (0 CU inference, zero hallucination)'
-            : 'SAP BRFplus Decision Tables: 100% rechtssichere, deterministische Regelausführung (0 CU Inferenz, Null Halluzinationsrisiko)';
+            ? 'SAP Autonomous Evaluation Agent: ATP & risk evaluation with automated escalation gate'
+            : 'Autonomer SAP Entscheidungs-Agent: ATP- & Kreditlimit-Prüfung mit Eskalations-Gate';
           break;
 
         case 'Executor / Actuator':
