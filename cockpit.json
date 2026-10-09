@@ -1,0 +1,102 @@
+{
+  "title": "SAP Process Simulator & Advisory Suite",
+  "subtitle": "Next Chapter Experts · Peter Alexander",
+  "domains": [
+    "01_produkte_appliance",
+    "02_lehre_studenten",
+    "03_consulting_btc"
+  ],
+  "domain_roles": {
+    "01_produkte_appliance": "Eigenständiges C-Level Advisory Tool & Clean Core Simulator",
+    "02_lehre_studenten": "Säule 4 im Studentenprojekt V2 Curriculum",
+    "03_consulting_btc": "Test- und Simulationsumgebung für APIM Policies & Integration Cell"
+  },
+  "role": "Interaktiver Prozess-Simulator (Säule 4 im Studentenprojekt & Standalone Advisory Tool)",
+  "badge": "Port 5000 Live · Säule 4",
+  "executive_summary": "Interaktives C-Level Werkzeug zur Dekomposition von SAP-Standardprozessen in OODA-Phasen und 6 kognitive Primitives. Ermittelt das echte Pareto-Optimum (100% Dunkelverarbeitung) und berechnet Clean Core Compliance sowie BTP AI Core Kosten.",
+  "status_overview": {
+    "current_stage": "v1.5 produktionsbereit (SAP AI Core Calculator MCP integriert)",
+    "what_is_done": "OODA-Dekomposition, HITL-Entscheidungskonsole, Pareto-Solver mit 100% Dunkelverarbeitung, 81 SAP AI Core Foundation Models & BTP Cost Calculator angebunden.",
+    "what_is_open": "v2.0 Granulares BTP-Pricing nach Capacity Units (CU) und Signavio BPMN 2.0 Import/Export."
+  },
+  "upcoming_events": [
+    {
+      "date": "Freitag, 23.10.2026 13:00 Uhr",
+      "event": "Final Call mit Michael Dorn (Feedback & Next Steps zur Platzierung an Hochschulen)",
+      "type": "Absprache / Meilenstein"
+    },
+    {
+      "date": "In ca. 2 Wochen",
+      "event": "Vor-Ort-Treffen Berlin mit den 4 Studierenden (Präsentation Säule 4 Simulator)",
+      "type": "Präsentation / Lehre"
+    },
+    {
+      "date": "29.11. – 05.12.2026",
+      "event": "SAP Career Launchpad Chișinău (Moldawien) mit Michael Dorn — Einsatz als Schulungswerkzeug",
+      "type": "Dienstreise / Workshop"
+    }
+  ],
+  "agreements": [
+    "Säule 4 im Studentenprojekt: Studierende nutzen den Simulator für ihre Clean Core Projektarbeit.",
+    "Michael Dorn / PBD Experts: Vermarktung des Simulators im Enterprise Launchpad und bei Hochschulkursen.",
+    "Dualer Modus: Standalone auf Port 5000 oder als didaktisches Werkzeug im Curriculum."
+  ],
+  "stakeholders": [
+    { "name": "Peter Alexander", "email": "peter.alexander@nextchapterexperts.de", "role": "Inhaber / Architekt" },
+    { "name": "Michael Dorn", "email": "md@pbd-experts.com", "org": "PBD Experts", "role": "Partner & Multiplikator (Launchpad / Hochschulen)" },
+    { "name": "4 Studierende", "email": "benechristophere1@gmail.com", "org": "WAQAM", "role": "Anwender Säule 4" }
+  ],
+  "communication_settings": {
+    "key_contacts": [
+      "md@pbd-experts.com",
+      "benechristophere1@gmail.com",
+      "mdn.nazmul.edu@gmail.com",
+      "popovici.petru94@gmail.com"
+    ],
+    "keywords": [
+      "Process Simulator",
+      "ProzessSimulator",
+      "Studentenprojekt",
+      "Säule 4"
+    ]
+  },
+  "default_tab": "simulator",
+  "ports": [5000],
+  "related_projects": [
+    "/home/peter/Projekte/active/studentenprojekt_v2",
+    "/home/peter/Projekte/active/lizenz-simulation",
+    "/home/peter/Projekte/active/LoesungsAppliance"
+  ],
+  "tabs": [
+    {
+      "id": "simulator",
+      "title": "⚡ Live Simulator",
+      "type": "iframe",
+      "url": "http://localhost:5000"
+    },
+    {
+      "id": "doku",
+      "title": "📘 Dokumentation",
+      "type": "markdown",
+      "file": "DOKUMENTATION.md"
+    },
+    {
+      "id": "roadmap",
+      "title": "🗺️ Roadmap",
+      "type": "markdown",
+      "file": "ROADMAP.md"
+    },
+    {
+      "id": "methodik",
+      "title": "🎓 Methodik & Leitfaden",
+      "type": "markdown",
+      "file": "docs/METHODIK_SCHULUNGSLEITFADEN.md"
+    }
+  ],
+  "quick_links": [
+    {
+      "title": "Simulator direkt (Vollbild)",
+      "url": "http://localhost:5000"
+    }
+  ]
+}

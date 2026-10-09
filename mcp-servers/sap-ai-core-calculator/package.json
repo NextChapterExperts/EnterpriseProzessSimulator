@@ -1,0 +1,20 @@
+{
+  "name": "sap-ai-core-calculator-mcp",
+  "version": "1.0.0",
+  "description": "Local Model Context Protocol (MCP) server for SAP AI Core Cost Calculator, Foundation Models, and Step Recommendations",
+  "main": "dist/index.js",
+  "bin": {
+    "sap-ai-core-calculator-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["sap", "ai-core", "mcp", "calculator", "llm"],
+  "author": "SAP Process Simulator",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
