@@ -557,6 +557,34 @@ export const EnterpriseBoard: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Halluzinations-Schutzplanken & Governance */}
+                    <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-2 text-xs">
+                      <div className="flex items-center justify-between pb-1 border-b border-slate-800">
+                        <span className="font-bold text-sky-300 font-mono text-[10.5px] uppercase tracking-wider flex items-center space-x-1">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Anti-Halluzinations-Schutzplanken</span>
+                        </span>
+                        <span className="px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold bg-slate-800 text-slate-300">
+                          EU AI Act: {activeStep.euAiActRisk || 'MINIMAL'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                        <div>
+                          <span className="text-slate-500 block">Grounding-Basis:</span>
+                          <span className="text-slate-200 font-semibold">{activeStep.sapGoldenPathTool || 'SAP HANA Trigram / DOX'}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Eskalations-Schwelle:</span>
+                          <span className="text-amber-300 font-semibold">&lt; {activeStep.confidenceGate}% Konfidenz</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-1 border-t border-slate-800/80 text-[11px] text-slate-400 leading-snug">
+                        <strong className="text-emerald-400">Revisions-Garantie:</strong> Kein freies LLM-Schreiben. Verbuchung wird über ABAP CDS Schemavalidierung und S/4HANA ACID Commit abgesichert.
+                      </div>
+                    </div>
+
                     {/* SAP Discovery Center Link */}
                     <div className="pt-1">
                       <a
@@ -756,6 +784,28 @@ export const EnterpriseBoard: React.FC = () => {
                       </span>
                     </div>
                   </div>
+                </div>
+
+                {/* Warum SAP Joule statt Eigenbau (Zero-Halluzination-Architektur) */}
+                <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs">
+                  <div className="flex items-center space-x-1.5 text-emerald-400 font-bold text-[11px] font-mono uppercase tracking-wider">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Warum SAP Joule statt Eigenbau? (Anti-Halluzination)</span>
+                  </div>
+                  <ul className="space-y-1.5 text-slate-300 text-[11.5px] leading-relaxed">
+                    <li className="flex items-start space-x-2">
+                      <span className="text-emerald-400 font-bold">&bull;</span>
+                      <span><strong>SAP Document Grounding:</strong> Joule generiert keine freien Daten, sondern liest verifizierte Fakten via SAP Knowledge Graph direkt aus HANA Cloud.</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <span className="text-emerald-400 font-bold">&bull;</span>
+                      <span><strong>Deterministische Commit-Barriere:</strong> Das Modell schreibt niemals direkt in Tabellen. Buchungen laufen ausschließlich über typisierte SAP RAP Business Objects mit automatischem Rollback.</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <span className="text-emerald-400 font-bold">&bull;</span>
+                      <span><strong>EU AI Act &amp; GoBD-konform:</strong> Keine Kundendaten trainieren öffentliche Basismodelle. Vollständiges Audit-Logging aller Prompts und Entscheidungen nach SOX/GoBD.</span>
+                    </li>
+                  </ul>
                 </div>
 
                 {/* Discovery Center Link */}
