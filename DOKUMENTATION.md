@@ -119,4 +119,5 @@ Jeder Schritt im Workflow bietet eine vollständige Einsicht:
 - 📋 **[LOGFILE.md](LOGFILE.md):** Chronologisches Entwickler- und Session-Log aller Fehlerbehebungen und Implementierungen.
 - 🗺️ **[ROADMAP.md](ROADMAP.md):** Strategische Produkt-Roadmap mit allen abgeschlossenen (M1–M4) und geplanten (M5–M8) Meilensteinen.
 - 🎓 **[docs/METHODIK_SCHULUNGSLEITFADEN.md](docs/METHODIK_SCHULUNGSLEITFADEN.md):** Detaillierter Leitfaden für Workshops und SAP-Architektur-Schulungen.
+- 🧭 **[docs/UNTERSCHIED_ZU_SAP_SIGNAVIO.md](docs/UNTERSCHIED_ZU_SAP_SIGNAVIO.md):** Strategischer Berater-Leitfaden: Abgrenzung zu SAP Signavio, 30-Sekunden-C-Level-Pitch und gemeinsames 4-Phasen-Vorgehensmodell.
 - 📚 **[docs/steps/](docs/steps/README.md):** Didaktische Schritt-Dossiers zu jedem einzelnen Prozessschritt (1 bis 6) inkl. SAP-Tabellen, BAPIs, 5-Archetypen-Vergleich und Prüfungsfragen.
