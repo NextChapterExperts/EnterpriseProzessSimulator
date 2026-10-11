@@ -3,7 +3,7 @@
 
 > **Dokument:** NCE Strategic Positioning Paper  
 > **Autor:** Peter Alexander (NextChapter Experts)  
-> **Kontext:** Synthese aus dem SAP-Strategiepapier (*Thomas Goettsche, 10.10.2026*), der Zwingmann-Methodologie, dem EnterpriseProzessSimulator und der NCE Enterprise Solution Engine (LoesungsAppliance)  
+> **Kontext:** Synthese aus dem SAP-Strategiepapier (*SAP-interne Strategieanalysen*), der Zwingmann-Methodologie, dem EnterpriseProzessSimulator und der NCE Enterprise Solution Engine (LoesungsAppliance)  
 > **Stand:** Oktober 2026  
 > **Klassifizierung:** Vertraulich / Strategisches Beratungs- & Produkt-Asset
 
@@ -27,10 +27,10 @@ NCE bietet keine isolierten Folienschulungen, sondern eine geschlossene, softwar
 
 ## 🔍 2. Der Befund: Warum isolierte Tool-Schulungen scheitern
 
-Das Strategiepapier von **Thomas Göttsche (SAP, 10. Oktober 2026)** bringt das Branchenproblem schonungslos auf den Punkt:
+Das Strategiepapier von **aktuelle SAP-interne Strategieanalysen** bringt das Branchenproblem schonungslos auf den Punkt:
 > *„SAPs Lernangebot ist stark darin zu vermitteln, wie man mit agentischen Werkzeugen baut – aber schwach bei den Entscheidungen drumherum: Angefangen bei der Frage, ob man überhaupt automatisieren sollte, bis hin zu der Frage, wie Agenten betrieben und überwacht werden.“*
 
-Göttsche postuliert drei zwingende Forderungen für die Zukunft des Enterprise AI Enablements:
+Die Analyse postuliert drei zwingende Forderungen für die Zukunft des Enterprise AI Enablements:
 1. **Triage als Pflicht:** Konsequente Priorisierung: Standardfunktionalität vor starren deterministischen Regeln vor agentischen Systemen.
 2. **Kostenplanbarkeit & Human Impact:** Schutz vor unberechenbaren Tokenkosten und Berücksichtigung von Betriebsräten/Change Management vor dem Bau.
 3. **Praktiker-Wissen statt Foliensätze:** Didaktik muss direkt im Werkzeug des Beraters stattfinden und auf echter Implementierungserfahrung basieren.
