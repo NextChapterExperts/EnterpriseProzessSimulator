@@ -57,7 +57,42 @@ Wir liefern die fundierte Vorbereitung von Einführungsentscheidungen:
 
 ---
 
-## 3. Die drei Werkzeuge als roter Faden des Coachings
+## 3. Benchmark aus der Praxis: Was wir vom Palantir-FDE-Modell lernen
+
+Im Enterprise-Markt gilt **Palantir** mit seinem *Forward Deployed Engineering (FDE)* und den 5-Tage-*AIP Bootcamps* als Referenz für schnelle KI-Einführungen. Im Coaching analysieren wir dieses Modell, um Stärken zu übernehmen und Schwächen zu vermeiden:
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                      VERGLEICH: PALANTIR TECHNOLOGIES VS. NCE                          │
+├────────────────────────────┬─────────────────────────────┬─────────────────────────────┤
+│ Dimension                  │ Modell Palantir             │ Modell NextChapter Experts  │
+├────────────────────────────┼─────────────────────────────┼─────────────────────────────┤
+│ 1. Einstieg & Bindung      │ Sofortige Bindung an den    │ Herstellerneutralität:      │
+│                            │ proprietären Foundry-Stack  │ Agnostische Triage vor      │
+│                            │ über 5-Tage-Bootcamps       │ jeder Plattform-Festlegung  │
+├────────────────────────────┼─────────────────────────────┼─────────────────────────────┤
+│ 2. Rollenmodell            │ Strikte Teilung in:         │ Hybridprofil:               │
+│                            │ • Deltas (Technik/Daten)    │ Ein Berater vereint Prozess-│
+│                            │ • Echos (Strategie/Ops)     │ Triage und Architektur      │
+├────────────────────────────┼─────────────────────────────┼─────────────────────────────┤
+│ 3. Kosten & FinOps         │ Intransparente Großverträge │ Vorab-Kostenwahrheit:       │
+│                            │ mit unklaren Stückkosten    │ Exakte BTP-Inferenzkosten   │
+│                            │                             │ (0,02 AIU/Aktion) & Lizenzen│
+├────────────────────────────┼─────────────────────────────┼─────────────────────────────┤
+│ 4. Governance              │ Approval Controls in        │ Deterministische TVA-Gates  │
+│                            │ geschützten Branches        │ vor dem ERP-Core-Writeback  │
+└────────────────────────────┴─────────────────────────────┴─────────────────────────────┘
+```
+
+### Die zwei Kernlektionen für angehende Consultants:
+1. **Das hybride Beraterprofil (Delta + Echo):**  
+   Palantir schickt oft zwei Personen zum Kunden: Einen Strategen (*Echo*), der den Prozess versteht, und einen Coder (*Delta*), der die Pipeline baut. In unserem Coaching lernen die Teilnehmenden, beides in Personalunion zu beherrschen: Prozessverständnis am Verhandlungstisch und fundierte Architektur am Rechner.
+2. **Keine unkontrollierte KI im Core:**  
+   Selbst Palantirs internes Tool *AI FDE* darf in produktiven Branches nicht autonom schalten und walten – es erbt Benutzerrechte und verlangt Freigaben. Für uns gilt: Wer im ERP bucht, braucht deterministische Schutzschranken (*TVA-Gates*).
+
+---
+
+## 4. Die drei Werkzeuge als roter Faden des Coachings
 
 Die Ausbildung folgt exakt der Kette unserer drei Softwarewerkzeuge:
 
@@ -104,7 +139,7 @@ Die Ausbildung folgt exakt der Kette unserer drei Softwarewerkzeuge:
 
 ---
 
-## 4. Didaktischer Einstieg in das Praxistraining
+## 5. Didaktischer Einstieg in das Praxistraining
 
 ### Modul 0: Das Berater-Mindset
 * Wir sind keine Werkzeug-Verkäufer, sondern unabhängige Lösungsberater.
