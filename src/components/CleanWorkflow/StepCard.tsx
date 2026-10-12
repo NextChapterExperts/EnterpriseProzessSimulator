@@ -149,8 +149,12 @@ export const StepCard: React.FC<StepCardProps> = ({ step, index }) => {
     switch (arch) {
       case 'deterministic':
         return isEn
-          ? 'Tier 1 (Deterministic): Rigid rules via ABAP/BRFplus (100% reproducible, 0 token cost, halts on noise).'
-          : 'Stufe 1 (Deterministisch): Starre Regeln via ABAP/BRFplus (100% reproduzierbar, 0 Token-Kosten, stoppt bei Freitext).';
+          ? step.isUnstructuredInput
+            ? 'Tier 1 (Deterministic): Rigid parser fails on unstructured input -> requires manual clerk data entry (~12 min/doc).'
+            : 'Tier 1 (Deterministic): Rigid rules via ABAP/BRFplus (100% reproducible, 0 token cost, halts on noise).'
+          : step.isUnstructuredInput
+            ? 'Stufe 1 (Deterministisch): Starre Regeln scheitern an unstrukturiertem Input -> erfordert manuelle Sachbearbeiter-Erfassung (~12 Min./Beleg).'
+            : 'Stufe 1 (Deterministisch): Starre Regeln via ABAP/BRFplus (100% reproduzierbar, 0 Token-Kosten, stoppt bei Freitext).';
       case 'classic_ml':
         return isEn
           ? 'Tier 2 (Classic ML): Statistical pattern match / in-memory fuzzy search (fast, handles slight typos).'
@@ -195,6 +199,8 @@ export const StepCard: React.FC<StepCardProps> = ({ step, index }) => {
             className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold font-mono shrink-0 ${
               hasError
                 ? 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800'
+                : step.isUnstructuredInput && step.currentArchetype === 'deterministic'
+                ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
                 : isPassed
                 ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
                 : isCurrentSim
@@ -202,7 +208,7 @@ export const StepCard: React.FC<StepCardProps> = ({ step, index }) => {
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-transparent'
             }`}
           >
-            {hasError ? '✕' : isPassed ? '✓' : index + 1}
+            {hasError ? '✕' : step.isUnstructuredInput && step.currentArchetype === 'deterministic' ? '✍' : isPassed ? '✓' : index + 1}
           </div>
           <div className="min-w-0">
             <span className="text-xs font-bold text-slate-900 dark:text-white tracking-tight truncate block">
@@ -226,6 +232,8 @@ export const StepCard: React.FC<StepCardProps> = ({ step, index }) => {
               ? 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800'
               : hasEscalation
               ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
+              : step.isUnstructuredInput && step.currentArchetype === 'deterministic'
+              ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
               : trace?.isSelfHealed
               ? 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800'
               : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-900'
@@ -235,6 +243,8 @@ export const StepCard: React.FC<StepCardProps> = ({ step, index }) => {
             ? (isEn ? 'Error' : 'Fehler')
             : hasEscalation
             ? (isEn ? 'Escalation' : 'Klärung')
+            : step.isUnstructuredInput && step.currentArchetype === 'deterministic'
+            ? (isEn ? 'Manual' : 'Manuell')
             : trace?.isSelfHealed
             ? 'Healed'
             : 'OK'}

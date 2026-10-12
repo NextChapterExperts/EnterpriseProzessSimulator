@@ -94,6 +94,10 @@ export const LivePayloadMonitor: React.FC = () => {
   const isModified = currentDecision?.status === 'modified';
   const isRejected = currentDecision?.status === 'rejected';
 
+  const isManualDeterministic = Boolean(
+    currentStep?.isUnstructuredInput && currentStep?.currentArchetype === 'deterministic'
+  );
+
   const prevTrace = activeIndex > 0 && dryRunResult?.traces ? dryRunResult.traces[activeIndex - 1] : null;
 
   const isEn = language === 'en';
@@ -208,7 +212,7 @@ export const LivePayloadMonitor: React.FC = () => {
   };
 
   // Rendert ein Belegattribut mit verständlichem Label, technischem Schlüssel und interaktivem (i) Info-Icon
-  const renderFieldWithInfo = (key: string, val: any) => {
+  const renderFieldWithInfo = (key: string, val: any, isOutboundManual?: boolean) => {
     const meta = getFieldMeta(key, language);
     return (
       <div key={key} className="flex flex-col space-y-1 pb-1.5 border-b border-slate-200 dark:border-slate-800/40 last:border-b-0">
@@ -217,6 +221,11 @@ export const LivePayloadMonitor: React.FC = () => {
             {meta.label}
           </span>
           <span className="text-slate-400 dark:text-slate-500 font-mono text-[9px] opacity-80">({key})</span>
+          {isOutboundManual && (
+            <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-semibold">
+              {language === 'en' ? 'manually entered' : 'manuell erfasst'}
+            </span>
+          )}
           <div className="group relative inline-block">
             <span
               className="w-3.5 h-3.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-sky-100 dark:hover:bg-sky-950 text-sky-600 dark:text-sky-400 border border-slate-300 dark:border-slate-700 hover:border-sky-400 dark:hover:border-sky-500 flex items-center justify-center text-[9px] font-bold cursor-help transition select-none"
@@ -786,6 +795,8 @@ export const LivePayloadMonitor: React.FC = () => {
                 ? 'border-red-300 dark:border-red-600/80 bg-red-50/50 dark:bg-red-950/20 ring-1 ring-red-400/40'
                 : hasEscalation
                 ? 'border-amber-300 dark:border-amber-600/80 bg-amber-50/50 dark:bg-amber-950/20 ring-1 ring-amber-400/40'
+                : isManualDeterministic
+                ? 'border-amber-300 dark:border-amber-600/80 bg-amber-50/40 dark:bg-amber-950/20 ring-1 ring-amber-400/30'
                 : 'border-slate-200 dark:border-slate-800'
             }`}
           >
@@ -805,7 +816,7 @@ export const LivePayloadMonitor: React.FC = () => {
                         ? 'bg-purple-500 animate-pulse'
                         : hasError
                         ? 'bg-red-500'
-                        : hasEscalation
+                        : hasEscalation || isManualDeterministic
                         ? 'bg-amber-500'
                         : 'bg-emerald-500'
                     }`}
@@ -818,19 +829,23 @@ export const LivePayloadMonitor: React.FC = () => {
                         ? 'text-purple-700 dark:text-purple-300'
                         : hasError
                         ? 'text-red-700 dark:text-red-400'
-                        : hasEscalation
-                        ? 'text-amber-700 dark:text-amber-300'
+                        : hasEscalation || isManualDeterministic
+                        ? 'text-amber-700 dark:text-amber-400'
                         : 'text-emerald-700 dark:text-emerald-400'
                     }`}
                   >
-                    {language === 'en' ? '📤 OUTBOUND' : '📤 AUSGANG'}
+                    {isManualDeterministic
+                      ? (language === 'en' ? '📤 OUTBOUND (MANUAL)' : '📤 AUSGANG (MANUELL)')
+                      : (language === 'en' ? '📤 OUTBOUND' : '📤 AUSGANG')}
                   </span>
                 </div>
 
                 {/* Gewählte Verarbeitungsart (AI-Kapazität) */}
                 <div
                   className={`flex items-center space-x-1 text-[10px] font-mono px-2 py-0.5 rounded border font-semibold ${
-                    currentStep?.currentArchetype === 'deterministic'
+                    isManualDeterministic
+                      ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                      : currentStep?.currentArchetype === 'deterministic'
                       ? 'bg-slate-100 dark:bg-slate-900 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-800/80'
                       : currentStep?.currentArchetype === 'classic_ml'
                       ? 'bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 border-teal-300 dark:border-teal-800'
@@ -840,10 +855,16 @@ export const LivePayloadMonitor: React.FC = () => {
                       ? 'bg-violet-100 dark:bg-violet-950 text-violet-800 dark:text-violet-300 border-violet-300 dark:border-violet-800'
                       : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800'
                   }`}
-                  title={language === 'en' ? 'Currently selected AI tier for this step' : 'Aktuell im Step gewählte AI-Kapazität'}
+                  title={
+                    isManualDeterministic
+                      ? (language === 'en' ? 'Unstructured input requires manual clerk transcription' : 'Unstrukturierter Beleg erfordert manuelle Sachbearbeiter-Erfassung')
+                      : (language === 'en' ? 'Currently selected AI tier for this step' : 'Aktuell im Step gewählte AI-Kapazität')
+                  }
                 >
                   <span>
-                    {currentStep?.currentArchetype === 'deterministic'
+                    {isManualDeterministic
+                      ? (language === 'en' ? '✍️ Manual Clerk Entry' : '✍️ Manuelle Sachbearbeiter-Erfassung')
+                      : currentStep?.currentArchetype === 'deterministic'
                       ? (language === 'en' ? '⚙️ Deterministic' : '⚙️ Deterministisch')
                       : currentStep?.currentArchetype === 'classic_ml'
                       ? (language === 'en' ? '📝 Assistant (Model)' : '📝 Assistant (Modell)')
@@ -859,24 +880,64 @@ export const LivePayloadMonitor: React.FC = () => {
               {/* 2. Sub-Leiste: Mechanismus & Konfidenz */}
               <div className="flex flex-wrap items-center justify-between text-[10px] text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900/90 px-2 py-1 rounded border border-slate-200 dark:border-slate-800 font-mono gap-1">
                 <span className="text-slate-700 dark:text-slate-300 truncate max-w-[240px]" title={trace?.techniqueMechanism}>
-                  {trace?.techniqueMechanism || (language === 'en' ? 'SAP S/4HANA Processing' : 'SAP S/4HANA Verarbeitung')}
+                  {isManualDeterministic
+                    ? (language === 'en' ? 'Manual Transcription (Pre-AI Baseline)' : 'Händische Belegübernahme (Vor-KI Baseline)')
+                    : (trace?.techniqueMechanism || (language === 'en' ? 'SAP S/4HANA Processing' : 'SAP S/4HANA Verarbeitung'))}
                 </span>
                 <span
                   className={`font-bold ${
-                    (trace?.confidence || 0) >= 0.85
+                    isManualDeterministic
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : (trace?.confidence || 0) >= 0.85
                       ? 'text-emerald-600 dark:text-emerald-400'
                       : (trace?.confidence || 0) >= 0.6
                       ? 'text-amber-600 dark:text-amber-400'
                       : 'text-red-600 dark:text-red-400'
                   }`}
                 >
-                  {Math.round((trace?.confidence || 0) * 100)}% {t.confidence}
+                  {isManualDeterministic
+                    ? (language === 'en' ? '15% Rule Hit (85% Manual)' : '15% Regeltreffer (85% Manuell)')
+                    : `${Math.round((trace?.confidence || 0) * 100)}% ${t.confidence}`}
                 </span>
               </div>
 
               {/* 3. Status-Banner / Alert abhängig vom Ausgang */}
               <div className="text-xs space-y-2 pt-0.5">
-                {currentStep?.currentArchetype === 'copilot' ? (
+                {isManualDeterministic ? (
+                  <div className="bg-amber-50/90 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700/80 p-2.5 rounded-lg text-amber-900 dark:text-amber-200 text-[11px] space-y-1 shadow-sm">
+                    <div className="font-bold flex items-center justify-between text-amber-800 dark:text-amber-300">
+                      <div className="flex items-center space-x-1.5">
+                        <span>✍️</span>
+                        <span>{language === 'en' ? 'Manual Clerk Entry (Pre-AI Baseline)' : 'Manuelle Erfassung erforderlich (Vor-KI Baseline)'}</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-200/80 dark:bg-amber-900/80 text-amber-900 dark:text-amber-100">
+                        {language === 'en' ? '85% Manual Effort' : '85% Manueller Aufwand'}
+                      </span>
+                    </div>
+                    <p className="leading-relaxed text-amber-800/90 dark:text-amber-300/90">
+                      {language === 'en'
+                        ? 'Deterministic parsers fail on unstructured text/PDF. In the pre-AI baseline, clerks must manually transcribe data into SAP (~12 min/document).'
+                        : 'Deterministische Parser scheitern an unstrukturiertem Freitext/PDF. In der Vor-KI-Baseline müssen Sachbearbeiter die Belegdaten händisch in SAP erfassen (~12 Min./Beleg).'}
+                    </p>
+                  </div>
+                ) : currentStep?.isUnstructuredInput && (currentStep?.currentArchetype === 'classic_ml' || currentStep?.currentArchetype === 'autopilot') ? (
+                  <div className="bg-emerald-50/90 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700/80 p-2.5 rounded-lg text-emerald-900 dark:text-emerald-200 text-[11px] space-y-1 shadow-sm">
+                    <div className="font-bold flex items-center justify-between text-emerald-800 dark:text-emerald-300">
+                      <div className="flex items-center space-x-1.5">
+                        <span>⚡</span>
+                        <span>{language === 'en' ? 'Dark Processing (STP) via AI' : 'Dunkelverarbeitung (STP) via KI'}</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-200/80 dark:bg-emerald-900/80 text-emerald-900 dark:text-emerald-100">
+                        {language === 'en' ? '0 Min Clerk Effort' : '0 Min. Tippaufwand'}
+                      </span>
+                    </div>
+                    <p className="leading-relaxed text-emerald-800/90 dark:text-emerald-300/90">
+                      {language === 'en'
+                        ? 'AI model directly extracts header and line items from document layout. Manual clerk typing eliminated.'
+                        : 'KI-Modell extrahiert Kopf- und Positionsdaten direkt aus dem Beleglayout. Der manuelle Tippaufwand entfällt.'}
+                    </p>
+                  </div>
+                ) : currentStep?.currentArchetype === 'copilot' ? (
                   <div className="bg-white dark:bg-slate-900 border border-sky-300 dark:border-sky-800/80 rounded-xl p-3 space-y-2.5 shadow-md">
                     {/* Header mit HITL Status */}
                     <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
@@ -1014,18 +1075,24 @@ export const LivePayloadMonitor: React.FC = () => {
                       <span className="flex items-center space-x-1.5 text-sky-700 dark:text-sky-300">
                         <span>📤</span>
                         <span>
-                          {language === 'en'
-                            ? 'Extracted / Generated Fields:'
-                            : 'Extrahierte / Erzeugte Belegdaten:'}
+                          {isManualDeterministic
+                            ? (language === 'en' ? 'Data (Manually Captured by Clerk):' : 'Belegdaten (Manuell durch Sachbearbeiter erfasst):')
+                            : (language === 'en' ? 'Extracted / Generated Fields:' : 'Extrahierte / Erzeugte Belegdaten:')}
                         </span>
                       </span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-normal">
-                        {Object.keys(trace?.outputData || {}).length} {language === 'en' ? 'Fields' : 'Felder'}
+                      <span className={`text-[9px] px-1.5 py-0.2 rounded font-normal ${
+                        isManualDeterministic
+                          ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-semibold'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                      }`}>
+                        {isManualDeterministic
+                          ? (language === 'en' ? 'Manual Post-Processing' : 'Manuelle Nachbearbeitung')
+                          : `${Object.keys(trace?.outputData || {}).length} ${language === 'en' ? 'Fields' : 'Felder'}`}
                       </span>
                     </div>
                     <div className="space-y-1.5 pt-0.5 max-h-[280px] overflow-y-auto pr-1">
                       {Object.entries(trace.outputData).map(([k, v]) =>
-                        renderFieldWithInfo(k, v)
+                        renderFieldWithInfo(k, v, isManualDeterministic)
                       )}
                     </div>
                   </div>
