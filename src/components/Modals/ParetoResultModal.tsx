@@ -22,6 +22,7 @@ import {
   Coins,
   ChevronDown,
   ChevronUp,
+  FileText,
 } from 'lucide-react';
 import { SapAgentMatchResult } from '@/types/process';
 
@@ -33,6 +34,7 @@ export const ParetoResultModal: React.FC = () => {
     revertParetoOptimization,
     startSimulation,
     language,
+    toggleBlueprint,
   } = useSimulatorStore();
 
   const [activeTab, setActiveTab] = useState<'agents' | 'adjustments'>('agents');
@@ -453,6 +455,17 @@ export const ParetoResultModal: React.FC = () => {
           </button>
 
           <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => {
+                toggleParetoModal(false);
+                toggleBlueprint(true);
+              }}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md shadow-sky-500/20 transition active:scale-95"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>{isEn ? 'Management Report (PDF)' : 'Management-Report (PDF)'}</span>
+            </button>
             <button
               type="button"
               onClick={() => toggleParetoModal(false)}

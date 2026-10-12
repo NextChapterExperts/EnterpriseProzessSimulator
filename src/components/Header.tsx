@@ -6,7 +6,7 @@ import { getProcessTemplates } from '@/data/templates';
 import { ProcessTemplate } from '@/types/process';
 import { TRANSLATIONS } from '@/i18n/translations';
 import { CreateWorkflowModal } from '@/components/Modals/CreateWorkflowModal';
-import { Layers, Workflow, Play, Compass, Info, Sun, Moon, Scale } from 'lucide-react';
+import { Layers, Workflow, Play, Compass, Info, Sun, Moon, Scale, FileText } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const {
@@ -19,6 +19,7 @@ export const Header: React.FC = () => {
     setLanguage,
     openProcessKnowledge,
     openEvaluationMatrix,
+    toggleBlueprint,
     theme,
     setTheme,
   } = useSimulatorStore();
@@ -166,6 +167,16 @@ export const Header: React.FC = () => {
         >
           <Scale className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
           <span>{t.btnEvaluationMatrix}</span>
+        </button>
+
+        {/* Button: Management-Report (PDF) */}
+        <button
+          onClick={() => toggleBlueprint(true)}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/80 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-xs font-semibold transition active:scale-95 shadow-sm"
+          title={language === 'en' ? 'Management Decision Memo & Architecture Report (PDF)' : 'Management Decision Memo & Architektur-Report (PDF)'}
+        >
+          <FileText className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span>Management-Report</span>
         </button>
 
         {/* Button: Neuen Workflow anlegen & modellieren */}
