@@ -6,7 +6,8 @@
     "dev": "next dev -p 5001",
     "build": "next build",
     "start": "next start -p 5001",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "npx tsx tests/verify-simulation-core.ts"
   },
   "dependencies": {
     "@xyflow/react": "^12.4.2",

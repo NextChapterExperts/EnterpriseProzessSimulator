@@ -28,27 +28,33 @@ export function calculateStepMetrics(step: ProcessStep, config: SimulationConfig
 
   // Einfluss des Archetyps und des Inputs
   if (archetype === 'deterministic') {
-    if (step.primitive === 'Filter / Gatekeeper') {
-      // Deterministischer Fast-Path / Header-Regex / Whitelist-Triage (Event Mesh)
-      rawAutomationRate = Math.max(0.85, (step.confidenceGate / 100) - dataNoiseRate * 0.08);
-    } else if (step.isUnstructuredInput) {
-      // Deterministischer Parser bricht bei unstrukturierten Freitexten fast immer ab!
-      rawAutomationRate = Math.max(0.05, 0.20 - dataNoiseRate * 0.18);
+    if (step.isUnstructuredInput) {
+      // Unstrukturierter Freitext: Deterministischer Parser bricht fast immer ab!
+      // Wenn es ein einfacher Filter ist, schafft Regex vielleicht 30-40%, aber echter Freitext scheitert.
+      if (step.primitive === 'Filter / Gatekeeper') {
+        rawAutomationRate = Math.max(0.10, 0.40 - dataNoiseRate * 0.30);
+      } else {
+        rawAutomationRate = Math.max(0.05, 0.18 - dataNoiseRate * 0.20);
+      }
     } else {
-      // Bei strukturierten Daten (z.B. BRFplus, ATP) extrem robust
-      rawAutomationRate = Math.max(0.85, 0.999 - dataNoiseRate * 0.10);
+      // Strukturierte Daten (BOM, BRFplus, ATP, BAPI): extrem robust
+      const baseConf = (step.confidenceGate / 100);
+      rawAutomationRate = Math.max(0.85, baseConf - dataNoiseRate * 0.05);
     }
   } else if (archetype === 'classic_ml') {
-    // Fuzzy Search / Vector Retrieval
-    rawAutomationRate = Math.max(0.60, 0.94 - dataNoiseRate * 0.20);
+    // SAP Document AI / HANA Fuzzy Search
+    const conf = step.confidenceGate / 100;
+    rawAutomationRate = Math.max(0.60, conf - dataNoiseRate * 0.15);
   } else if (archetype === 'copilot') {
     // Mensch autorisiert immer aktiv mit (Teil-Klärung ca. 20% Zeit)
-    rawAutomationRate = Math.max(0.50, (step.confidenceGate / 100) - dataNoiseRate * 0.15);
+    const conf = step.confidenceGate / 100;
+    rawAutomationRate = Math.max(0.50, conf - dataNoiseRate * 0.12);
   } else if (archetype === 'autopilot') {
-    rawAutomationRate = Math.max(0.40, (step.confidenceGate / 100) - dataNoiseRate * 0.25);
+    const conf = step.confidenceGate / 100;
+    rawAutomationRate = Math.max(0.40, conf - dataNoiseRate * 0.22);
   } else if (archetype === 'agentic') {
     // Hohe Ambiguitätstoleranz, aber bei hohem Noise neigt es zu Loops
-    rawAutomationRate = Math.max(0.55, 0.92 - dataNoiseRate * 0.30);
+    rawAutomationRate = Math.max(0.45, 0.92 - dataNoiseRate * 0.30);
   }
 
   const effectiveAutomationRate = Math.min(0.999, Math.max(0.02, rawAutomationRate));
@@ -69,13 +75,16 @@ export function calculateStepMetrics(step: ProcessStep, config: SimulationConfig
   if (archetype === 'deterministic') {
     undetectedErrorRate = 0.0001; // Bei deterministischer Validierung fast null
   } else if (archetype === 'classic_ml') {
-    undetectedErrorRate = 0.008 * (1 + dataNoiseRate);
+    // Kalibriert: Bei SAP DOX / HANA Fuzzy Search mit Confidence Gate (z.B. 92-95%)
+    // fängt das Gate unsichere Fälle ab. Unentdeckte Fehler liegen im Promille-Bereich.
+    const gateSafetyFactor = (100 - step.confidenceGate) / 100;
+    undetectedErrorRate = (0.0005 + 0.005 * gateSafetyFactor) * (1 + dataNoiseRate);
   } else if (archetype === 'copilot') {
-    undetectedErrorRate = 0.002; // Mensch fängt fast alles ab
+    undetectedErrorRate = 0.001; // Mensch fängt fast alles ab
   } else if (archetype === 'autopilot') {
-    undetectedErrorRate = 0.035 * (1 + dataNoiseRate * 1.5);
+    undetectedErrorRate = 0.015 * (1 + dataNoiseRate * 1.5);
   } else if (archetype === 'agentic') {
-    undetectedErrorRate = 0.065 * (1 + dataNoiseRate * 2.0);
+    undetectedErrorRate = 0.040 * (1 + dataNoiseRate * 2.0);
   }
 
   const reversibilityFactor = step.reversibility / 5;

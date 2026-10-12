@@ -51,116 +51,146 @@ export class ParetoSolver {
       let targetCleanCore: CleanCoreIndex = step.cleanCoreIndex;
       let reason = isEn ? 'Already at optimum' : 'Bereits im Optimum';
 
-      switch (step.primitive) {
-        case 'Filter / Gatekeeper':
-          // 1. Observe: Vorfilter / Filter / Gatekeeper
-          // Deterministischer Fast-Path (Event Mesh, Header-Regex, MIME/Sender-Filter)
-          // 0 Tokens, 0 CU Inferenz, 100% Dunkelverarbeitung (STP)
+      // 1. Primitive & Input Aware Assignment
+      if (step.isUnstructuredInput) {
+        // Unstrukturierter Input: Benötigt SAP Document AI / Classic ML
+        // Deterministisch bricht hier bei Freitext mit hohem Klärungsaufwand ab.
+        if (step.primitive === 'Filter / Gatekeeper') {
+          targetArchetype = 'classic_ml';
+          targetConfidence = 92;
+          reason = isEn
+            ? 'SAP Document AI / Text Classifier: Automated unstructured triage & classification (reduces clerk triage time)'
+            : 'SAP Document AI / Textklassifikator: Automatisierte Vorfilterung unstrukturierter Meldungen';
+        } else if (step.primitive === 'Extractor / Transformer') {
+          targetArchetype = 'classic_ml';
+          targetConfidence = 95;
+          reason = isEn
+            ? 'Assistant (SAP Document AI background extraction): Automated straight-through extraction without manual typing'
+            : 'Assistant (SAP Document AI im Hintergrund): Automatisierte Belegextraktion ohne manuelles Abtippen';
+        } else if (step.primitive === 'Evaluator / Reasoner') {
+          targetArchetype = 'classic_ml';
+          targetConfidence = 92;
+          reason = isEn
+            ? 'Assistant (SAP Business AI / Automated Invoice & Claim Match): Discrepancy resolution with confidence gate'
+            : 'Assistant (SAP Business AI Rechnungs- & Reklamationsprüfung): Fehlertolerante Vorprüfung mit Konfidenzgatter';
+        } else {
+          targetArchetype = 'classic_ml';
+          targetConfidence = 92;
+          reason = isEn
+            ? 'Assistant (SAP Business AI): Unstructured data processing'
+            : 'Assistant (SAP Business AI): Verarbeitung unstrukturierter Daten';
+        }
+      } else {
+        // Strukturierter Input:
+        // In SAP S/4HANA Clean Core bleibt strukturierte Verarbeitung standardmäßig DETERMINISTISCH!
+        if (step.primitive === 'Matcher / Enricher') {
+          // Fehlertoleranter Stammdatenabgleich gegen KNA1/MARA/KNMT via HANA Trigram/Fuzzy Engine
+          targetArchetype = 'classic_ml';
+          targetConfidence = 95;
+          reason = isEn
+            ? 'SAP HANA Trigram & Fuzzy Search: Sub-millisecond master data reconciliation (0 CU inference, zero hallucination risk)'
+            : 'SAP HANA Trigram & Fuzzy Search: Fehlertoleranter Stammdaten-Abgleich im Millisekundenbereich (0 CU Inferenz, Null Halluzinationsrisiko)';
+        } else if (step.primitive === 'Filter / Gatekeeper') {
           targetArchetype = 'deterministic';
           targetConfidence = 99;
           reason = isEn
-            ? 'Deterministic triage filter (Event Mesh / Regex / Header): 100% straight-through processing (STP), 0 tokens, 0 inference cost'
-            : 'Deterministischer Triage-Filter (Event Mesh / Regex / Header): 100% Dunkelverarbeitung (STP), 0 Tokens, 0 Inferenzkosten';
-          break;
-
-        case 'Extractor / Transformer':
-          // 2. Observe: Extractor / Transformer
-          // SAP Business AI Autonomous Extraction Agent (85% STP Dunkelverarbeitung)
-          targetArchetype = 'autopilot';
-          targetConfidence = 90;
+            ? 'Deterministic triage filter (Event Mesh / Header Regex): 100% straight-through processing (STP), 0 tokens'
+            : 'Deterministischer Triage-Filter (Event Mesh / Header-Regex): 100% Dunkelverarbeitung (STP), 0 Tokens';
+        } else if (step.primitive === 'Evaluator / Reasoner') {
+          targetArchetype = 'deterministic';
+          targetConfidence = 99;
           reason = isEn
-            ? 'SAP Autonomous Extraction Agent: Ingestion & field extraction via SAP Document AI (85% STP)'
-            : 'Autonomer SAP Extraktions-Agent: Strukturierte Belegextraktion via SAP Document AI (85% STP)';
-          break;
-
-        case 'Matcher / Enricher':
-          // 3. Orient: Matcher / Enricher
-          // SAP Autonomous Matching Agent
-          targetArchetype = 'autopilot';
-          targetConfidence = 92;
-          reason = isEn
-            ? 'SAP Autonomous Matching Agent: In-memory entity resolution & master data reconciliation'
-            : 'Autonomer SAP Matching-Agent: Stammdatenabgleich & Entitätsauflösung via HANA Cloud Vector/Fuzzy Engine';
-          break;
-
-        case 'Evaluator / Reasoner':
-          // 4. Decide: Evaluator / Reasoner
-          // SAP Autonomous Evaluation & Risk Scoring Agent
-          targetArchetype = 'autopilot';
-          targetConfidence = 92;
-          reason = isEn
-            ? 'SAP Autonomous Evaluation Agent: ATP & risk evaluation with automated escalation gate'
-            : 'Autonomer SAP Entscheidungs-Agent: ATP- & Kreditlimit-Prüfung mit Eskalations-Gate';
-          break;
-
-        case 'Executor / Actuator':
-          // 5. Act: Executor / Actuator
-          // S/4HANA Clean Core RAP / OData / BAPI Verbuchung
-          // Atomare Verbuchung nach GoBD/SOX, Clean-Core compliant
+            ? 'SAP BRFplus Decision Tables: 100% audit-proof deterministic business rules execution (0 CU inference)'
+            : 'SAP BRFplus Decision Tables: 100% rechtssichere, deterministische Regelausführung (0 CU Inferenz)';
+        } else if (step.primitive === 'Executor / Actuator') {
           targetArchetype = 'deterministic';
           targetConfidence = 99;
           targetCleanCore = 'COMPLIANT';
           reason = isEn
             ? 'S/4HANA Clean Core RAP / OData: Fully automated straight-through posting compliant with Clean Core & GoBD/SOX standards'
             : 'S/4HANA Clean Core RAP / OData: Vollautomatische Dunkelverbuchung nach Clean-Core- & GoBD/SOX-Standards';
-          break;
-
-        case 'Generator / Synthesizer':
-          // 6. Act: Generator / Synthesizer
-          // Assistant / SAP BTP Output Management
-          // Automatisierte Beleg- und Benachrichtigungsgenerierung im Hintergrund ohne Sachbearbeiter-Blockade
-          targetArchetype = 'classic_ml';
-          targetConfidence = 92;
+        } else if (step.primitive === 'Generator / Synthesizer') {
+          targetArchetype = 'deterministic';
+          targetConfidence = 99;
           reason = isEn
-            ? 'Assistant (SAP BTP Output Management): Automated background document & notification generation (100% STP, no clerk halt)'
-            : 'Assistant (SAP BTP Output Management): Automatisierte Beleg- und Benachrichtigungsgenerierung im Hintergrund (100% STP, kein Sachbearbeiter-Stopp)';
-          break;
-
-        default:
-          // Fallback basierend auf OODA-Phase
-          if (step.oodaPhase === 'Observe') {
-            targetArchetype = 'deterministic';
-            targetConfidence = 98;
-            reason = isEn ? 'Deterministic input validation filter' : 'Deterministischer Eingangsvalidierungs-Filter';
-          } else if (step.oodaPhase === 'Orient') {
-            targetArchetype = 'classic_ml';
-            targetConfidence = 94;
-            reason = isEn ? 'SAP HANA Trigram & Fuzzy Search' : 'SAP HANA Trigram & Fuzzy Search';
-          } else if (step.oodaPhase === 'Decide') {
-            targetArchetype = 'deterministic';
-            targetConfidence = 99;
-            reason = isEn ? 'SAP BRFplus Decision Tables' : 'Deterministische BRFplus Entscheidungstabellen';
-          } else {
-            targetArchetype = 'deterministic';
-            targetConfidence = 99;
-            targetCleanCore = 'COMPLIANT';
-            reason = isEn ? 'S/4HANA Clean Core posting' : 'S/4HANA Clean Core Verbuchung';
-          }
-          break;
+            ? 'SAP BTP Output Management: Deterministic spool & document generation'
+            : 'SAP BTP Output Management: Deterministische Beleg- und Spoolgenerierung';
+        } else {
+          // Extractor / Transformer auf strukturierten Daten (z.B. Stücklistenauflösung, Barcode-Scan)
+          targetArchetype = 'deterministic';
+          targetConfidence = 99;
+          reason = isEn
+            ? 'Deterministic structured transformation (ABAP CDS / BAPI table mapping)'
+            : 'Deterministische Strukturtransformation (ABAP CDS / BAPI Tabellenmapping)';
+        }
       }
 
-      if (
-        targetArchetype !== step.currentArchetype ||
-        targetConfidence !== step.confidenceGate ||
-        targetCleanCore !== step.cleanCoreIndex
-      ) {
-        changesSummary.push({
-          stepId: step.id,
-          stepName: step.name,
-          oldArchetype: step.currentArchetype,
-          newArchetype: targetArchetype,
-          oldConfidence: step.confidenceGate,
-          newConfidence: targetConfidence,
-          reason,
-        });
+      // 2. STRIKTE SCHUTZPLANKEN (Guardrails):
+      // Reversibilität >= 4 (Blast Radius) darf NIEMALS Autopilot/Agentic sein!
+      if (step.reversibility >= 4) {
+        const unsafeArchetypes: AutomationArchetype[] = ['autopilot', 'agentic'];
+        if (unsafeArchetypes.includes(targetArchetype)) {
+          targetArchetype = 'deterministic';
+          targetConfidence = 99;
+          reason = isEn
+            ? 'Compliance guardrail: High blast radius (Reversibility >= 4) requires deterministic execution or human approval'
+            : 'Schutzplanke: Hoher Blast Radius (Reversibilität >= 4) erfordert deterministische Verbuchung';
+        }
       }
 
-      return {
+      // 3. MATHEMATISCHE PARETO-KONTROLLE (Step-Level Guard):
+      // Teste, ob die vorgeschlagene Änderung tatsächlich die Kosten senkt oder gleichhält!
+      const candidateStep: ProcessStep = {
         ...step,
         currentArchetype: targetArchetype,
         confidenceGate: targetConfidence,
         cleanCoreIndex: targetCleanCore,
       };
+
+      const costOriginal = calculateOverallMetrics([step], config).totalCostOfAutomationEur;
+      const costCandidate = calculateOverallMetrics([candidateStep], config).totalCostOfAutomationEur;
+
+      let finalStep = candidateStep;
+      let finalReason = reason;
+
+      if (costCandidate <= costOriginal) {
+        finalStep = candidateStep;
+      } else {
+        // Falls Kandidat teurer wäre, prüfe ob deterministische Optimierung mit maximalem Gate greift:
+        const tunedDeterministic: ProcessStep = {
+          ...step,
+          confidenceGate: Math.max(step.confidenceGate, 99),
+          cleanCoreIndex: targetCleanCore,
+        };
+        const costTuned = calculateOverallMetrics([tunedDeterministic], config).totalCostOfAutomationEur;
+        if (costTuned <= costOriginal) {
+          finalStep = tunedDeterministic;
+          finalReason = isEn
+            ? 'Optimized deterministic parameter gate'
+            : 'Optimiertes deterministisches Konfidenzgatter';
+        } else {
+          finalStep = step;
+          finalReason = isEn ? 'Baseline retained (already optimal)' : 'Baseline beibehalten (bereits optimal)';
+        }
+      }
+
+      if (
+        finalStep.currentArchetype !== step.currentArchetype ||
+        finalStep.confidenceGate !== step.confidenceGate ||
+        finalStep.cleanCoreIndex !== step.cleanCoreIndex
+      ) {
+        changesSummary.push({
+          stepId: step.id,
+          stepName: step.name,
+          oldArchetype: step.currentArchetype,
+          newArchetype: finalStep.currentArchetype,
+          oldConfidence: step.confidenceGate,
+          newConfidence: finalStep.confidenceGate,
+          reason: finalReason,
+        });
+      }
+
+      return finalStep;
     });
 
     const afterMetrics = calculateOverallMetrics(optimizedSteps, config);
