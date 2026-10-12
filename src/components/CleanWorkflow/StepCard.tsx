@@ -199,16 +199,16 @@ export const StepCard: React.FC<StepCardProps> = ({ step, index }) => {
             className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold font-mono shrink-0 ${
               hasError
                 ? 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800'
+                : isCurrentSim
+                ? 'bg-[#0A6ED1] text-white ring-2 ring-[#0A6ED1]/40'
                 : step.isUnstructuredInput && step.currentArchetype === 'deterministic'
                 ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
                 : isPassed
                 ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700'
-                : isCurrentSim
-                ? 'bg-[#0A6ED1] text-white'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-transparent'
             }`}
           >
-            {hasError ? '✕' : step.isUnstructuredInput && step.currentArchetype === 'deterministic' ? '✍' : isPassed ? '✓' : index + 1}
+            {hasError ? '✕' : isCurrentSim ? index + 1 : step.isUnstructuredInput && step.currentArchetype === 'deterministic' ? '✍' : isPassed ? '✓' : index + 1}
           </div>
           <div className="min-w-0">
             <span className="text-xs font-bold text-slate-900 dark:text-white tracking-tight truncate block">

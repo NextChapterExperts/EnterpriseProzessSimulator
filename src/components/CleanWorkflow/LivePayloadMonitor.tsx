@@ -222,7 +222,7 @@ export const LivePayloadMonitor: React.FC = () => {
           </span>
           <span className="text-slate-400 dark:text-slate-500 font-mono text-[9px] opacity-80">({key})</span>
           {isOutboundManual && (
-            <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-semibold">
+            <span className="text-[8.5px] font-mono px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-semibold">
               {language === 'en' ? 'manually entered' : 'manuell erfasst'}
             </span>
           )}
@@ -903,14 +903,30 @@ export const LivePayloadMonitor: React.FC = () => {
 
               {/* 3. Status-Banner / Alert abhängig vom Ausgang */}
               <div className="text-xs space-y-2 pt-0.5">
-                {isManualDeterministic ? (
+                {hasError ? (
+                  <div className="bg-red-100 dark:bg-red-950/70 border border-red-300 dark:border-red-800 p-2.5 rounded-lg text-red-900 dark:text-red-200 text-[11px] space-y-1">
+                    <div className="font-bold flex items-center space-x-1.5 text-red-600 dark:text-red-400">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      <span>{language === 'en' ? 'Error / Halt Signal' : 'Fehler / Stopp-Signal'}</span>
+                    </div>
+                    <p className="leading-relaxed">{trace?.logMessage || (language === 'en' ? 'Processing stopped.' : 'Verarbeitung gestoppt.')}</p>
+                  </div>
+                ) : hasEscalation ? (
+                  <div className="bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 p-2.5 rounded-lg text-amber-900 dark:text-amber-200 text-[11px] space-y-1">
+                    <div className="font-bold flex items-center space-x-1.5 text-amber-700 dark:text-amber-300">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      <span>{language === 'en' ? '⚠️ Clarification Required / Human-in-the-Loop' : '⚠️ Klärungsbedarf / Human-in-the-Loop'}</span>
+                    </div>
+                    <p className="leading-relaxed">{trace?.logMessage || (language === 'en' ? 'Confidence below threshold.' : 'Konfidenz zu gering.')}</p>
+                  </div>
+                ) : isManualDeterministic ? (
                   <div className="bg-amber-50/90 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700/80 p-2.5 rounded-lg text-amber-900 dark:text-amber-200 text-[11px] space-y-1 shadow-sm">
                     <div className="font-bold flex items-center justify-between text-amber-800 dark:text-amber-300">
                       <div className="flex items-center space-x-1.5">
                         <span>✍️</span>
                         <span>{language === 'en' ? 'Manual Clerk Entry (Pre-AI Baseline)' : 'Manuelle Erfassung erforderlich (Vor-KI Baseline)'}</span>
                       </div>
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-200/80 dark:bg-amber-900/80 text-amber-900 dark:text-amber-100">
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900/80 text-amber-900 dark:text-amber-100">
                         {language === 'en' ? '85% Manual Effort' : '85% Manueller Aufwand'}
                       </span>
                     </div>
@@ -927,7 +943,7 @@ export const LivePayloadMonitor: React.FC = () => {
                         <span>⚡</span>
                         <span>{language === 'en' ? 'Dark Processing (STP) via AI' : 'Dunkelverarbeitung (STP) via KI'}</span>
                       </div>
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-200/80 dark:bg-emerald-900/80 text-emerald-900 dark:text-emerald-100">
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-200/80 dark:bg-emerald-900/80 text-emerald-900 dark:text-emerald-100">
                         {language === 'en' ? '0 Min Clerk Effort' : '0 Min. Tippaufwand'}
                       </span>
                     </div>
@@ -1050,22 +1066,6 @@ export const LivePayloadMonitor: React.FC = () => {
                     </div>
                     <p className="leading-relaxed">{trace?.logMessage}</p>
                   </div>
-                ) : hasError ? (
-                  <div className="bg-red-100 dark:bg-red-950/70 border border-red-300 dark:border-red-800 p-2.5 rounded-lg text-red-900 dark:text-red-200 text-[11px] space-y-1">
-                    <div className="font-bold flex items-center space-x-1.5 text-red-600 dark:text-red-400">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      <span>{language === 'en' ? 'Error / Halt Signal' : 'Fehler / Stopp-Signal'}</span>
-                    </div>
-                    <p className="leading-relaxed">{trace?.logMessage || (language === 'en' ? 'Processing stopped.' : 'Verarbeitung gestoppt.')}</p>
-                  </div>
-                ) : hasEscalation ? (
-                  <div className="bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 p-2.5 rounded-lg text-amber-900 dark:text-amber-200 text-[11px] space-y-1">
-                    <div className="font-bold flex items-center space-x-1.5 text-amber-700 dark:text-amber-300">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      <span>{language === 'en' ? '⚠️ Clarification Required / Human-in-the-Loop' : '⚠️ Klärungsbedarf / Human-in-the-Loop'}</span>
-                    </div>
-                    <p className="leading-relaxed">{trace?.logMessage || (language === 'en' ? 'Confidence below threshold.' : 'Konfidenz zu gering.')}</p>
-                  </div>
                 ) : null}
 
                 {/* 4. Strukturierte Ergebnisdaten: 1:1 extrahierte Belegdaten */}
@@ -1080,7 +1080,7 @@ export const LivePayloadMonitor: React.FC = () => {
                             : (language === 'en' ? 'Extracted / Generated Fields:' : 'Extrahierte / Erzeugte Belegdaten:')}
                         </span>
                       </span>
-                      <span className={`text-[9px] px-1.5 py-0.2 rounded font-normal ${
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-normal ${
                         isManualDeterministic
                           ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-semibold'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'

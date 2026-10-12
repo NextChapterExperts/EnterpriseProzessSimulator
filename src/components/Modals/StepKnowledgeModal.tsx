@@ -816,7 +816,7 @@ export const StepKnowledgeModal: React.FC = () => {
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                   {isEn ? (
                     <>
-                      <strong>Why is an "Assistant" Tier 2 in Zwingmann, but a multi-agent supervisor in SAP?</strong>
+                      <strong>Why is an &quot;Assistant&quot; Tier 2 in Zwingmann, but a multi-agent supervisor in SAP?</strong>
                       <br />
                       Zwingmann classifies algorithms by <em>cybernetic autonomy</em>: Tier 2 (Task-Assistant) is a stateless, single-turn call (prompt in ➔ text/JSON out, no dialogue, no tools). SAP, conversely, uses &quot;Joule Digital Assistant&quot; as a <em>UX persona / enterprise orchestrator</em> at the very top of Fiori, coordinating domain agents across S/4HANA and BTP. That SAP supervisor role corresponds to <strong>Zwingmann Tier 5 (Agentic Multi-Agent)</strong>.
                     </>
