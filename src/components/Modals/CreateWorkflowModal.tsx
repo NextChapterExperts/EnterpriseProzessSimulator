@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useSimulatorStore } from '@/store/useSimulatorStore';
 import { ProcessTemplate, ProcessStep } from '@/types/process';
+import { getProcessTemplates } from '@/data/templates';
 import { TRANSLATIONS } from '@/i18n/translations';
 import {
   X,
@@ -44,7 +45,7 @@ export const CreateWorkflowModal: React.FC<CreateWorkflowModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { language, addCustomTemplate } = useSimulatorStore();
+  const { language, addCustomTemplate, customTemplates } = useSimulatorStore();
   const t = TRANSLATIONS[language];
 
   const [activeTab, setActiveTab] = useState<'upload' | 'blueprints' | 'paste'>('blueprints');
@@ -54,6 +55,17 @@ export const CreateWorkflowModal: React.FC<CreateWorkflowModalProps> = ({
   const [fileName, setFileName] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isAlreadyLoaded = useMemo(() => {
+    if (!parsedTemplate) return false;
+    const builtIns = getProcessTemplates(language);
+    return (
+      builtIns.some((t) => t.id === parsedTemplate.id) ||
+      customTemplates.some(
+        (t) => t.id === parsedTemplate.id || (t.scopeCode === parsedTemplate.scopeCode && t.name === parsedTemplate.name)
+      )
+    );
+  }, [parsedTemplate, language, customTemplates]);
 
   if (!isOpen) return null;
 
@@ -352,12 +364,25 @@ export const CreateWorkflowModal: React.FC<CreateWorkflowModalProps> = ({
                 </p>
               </div>
 
+              {/* Hinweis bei bereits existierendem Workflow */}
+              {isAlreadyLoaded && (
+                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed">
+                  {language === 'en'
+                    ? 'ℹ This workflow already exists in the simulator. Loading will update (overwrite) it without creating a duplicate.'
+                    : 'ℹ Dieser Workflow existiert bereits im Simulator. Beim Laden wird er aktualisiert (überschrieben), ohne einen doppelten Eintrag zu erzeugen.'}
+                </div>
+              )}
+
               {/* Action Button */}
               <button
                 onClick={handleApplyWorkflow}
                 className="w-full py-2.5 px-4 rounded-xl bg-[#0A6ED1] hover:bg-[#0854a0] text-white font-bold text-xs shadow-md transition flex items-center justify-center space-x-2"
               >
-                <span>{language === 'en' ? 'Load Workflow into Simulator' : 'Workflow in Simulator laden & visualisieren'}</span>
+                <span>
+                  {isAlreadyLoaded
+                    ? (language === 'en' ? 'Update & Reload Workflow' : 'Workflow aktualisieren & neu laden')
+                    : (language === 'en' ? 'Load Workflow into Simulator' : 'Workflow in Simulator laden & visualisieren')}
+                </span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

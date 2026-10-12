@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useSimulatorStore } from '@/store/useSimulatorStore';
 import { getProcessTemplates } from '@/data/templates';
+import { ProcessTemplate } from '@/types/process';
 import { TRANSLATIONS } from '@/i18n/translations';
 import { CreateWorkflowModal } from '@/components/Modals/CreateWorkflowModal';
 import { Layers, Workflow, Play, Compass, Info, Sun, Moon, Scale } from 'lucide-react';
@@ -25,7 +26,12 @@ export const Header: React.FC = () => {
   const [showCreatorModal, setShowCreatorModal] = useState(false);
   const t = TRANSLATIONS[language];
   const templates = getProcessTemplates(language);
-  const allAvailableTemplates = [...templates, ...customTemplates];
+  const allAvailableTemplates = React.useMemo(() => {
+    const map = new Map<string, ProcessTemplate>();
+    templates.forEach((t) => map.set(t.id, t));
+    customTemplates.forEach((t) => map.set(t.id, t));
+    return Array.from(map.values());
+  }, [templates, customTemplates]);
 
   return (
     <header className="bg-white dark:bg-[#0B132B] border-b border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 px-6 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm dark:shadow-xl select-none transition-colors duration-150">
@@ -35,16 +41,11 @@ export const Header: React.FC = () => {
           <Layers className="w-5 h-5 text-white" />
         </div>
         <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="font-bold text-sm tracking-tight text-slate-900 dark:text-white">
-              {t.appTitle}
-            </h1>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-800">
-              Enterprise &bull; Discovery Center
-            </span>
-          </div>
+          <h1 className="font-bold text-sm tracking-tight text-slate-900 dark:text-white">
+            {t.appTitle}
+          </h1>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            {t.appSubtitle} &bull; SAP AI Catalog Matching &amp; BTP AIU Pricing
+            {t.appSubtitle}
           </p>
         </div>
       </div>

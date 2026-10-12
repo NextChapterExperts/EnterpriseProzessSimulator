@@ -16,7 +16,6 @@ import { DryRunEngine } from '@/lib/dryRunEngine';
 import { Language, TRANSLATIONS } from '@/i18n/translations';
 import { matchAllStepsToSapAgents } from '@/lib/sapAiCatalogMatcher';
 
-export type ViewTab = 'canvas' | 'cockpit' | 'blueprint';
 
 function enrichStepsWithSapAgents(steps: ProcessStep[], monthlyVolume: number, lang: Language): ProcessStep[] {
   const matching = matchAllStepsToSapAgents(steps, monthlyVolume, lang);
@@ -28,6 +27,8 @@ function enrichStepsWithSapAgents(steps: ProcessStep[], monthlyVolume: number, l
     };
   });
 }
+
+export type ViewTab = 'canvas' | 'cockpit' | 'blueprint';
 
 interface SimulatorState {
   theme: 'light' | 'dark';
@@ -139,7 +140,27 @@ interface SimulatorState {
   ) => void;
 }
 
-const initialTemplate = PROCESS_TEMPLATES[0];
+const getInitialLanguage = (): Language => {
+  if (typeof window !== 'undefined') {
+    try {
+      const urlLang = new URLSearchParams(window.location.search).get('lang');
+      if (urlLang === 'en' || urlLang === 'de') {
+        localStorage.setItem('sap_simulator_lang', urlLang);
+        return urlLang as Language;
+      }
+      const saved = localStorage.getItem('sap_simulator_lang');
+      if (saved === 'en' || saved === 'de') {
+        return saved as Language;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return 'en';
+};
+
+const initialLang = getInitialLanguage();
+const initialTemplate = getProcessTemplates(initialLang)[0] || PROCESS_TEMPLATES[0];
 const initialConfig: SimulationConfig = {
   monthlyVolume: 25000,
   dataNoiseRate: 0.15,
@@ -180,6 +201,13 @@ const getInitialTheme = (): 'light' | 'dark' => {
   return 'light';
 };
 
+function mergeTemplates(builtIn: ProcessTemplate[], custom: ProcessTemplate[]): ProcessTemplate[] {
+  const map = new Map<string, ProcessTemplate>();
+  builtIn.forEach((t) => map.set(t.id, t));
+  custom.forEach((t) => map.set(t.id, t));
+  return Array.from(map.values());
+}
+
 export const useSimulatorStore = create<SimulatorState>((set, get) => ({
   theme: getInitialTheme(),
   setTheme: (theme: 'light' | 'dark') => {
@@ -191,10 +219,10 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     applyThemeToDocument(next);
     set({ theme: next });
   },
-  language: 'de',
+  language: initialLang,
   currentTemplate: initialTemplate,
   customTemplates: [],
-  steps: enrichStepsWithSapAgents(initialTemplate.steps, initialConfig.monthlyVolume, 'de'),
+  steps: initialTemplate.steps,
   config: initialConfig,
   metrics: calculateOverallMetrics(initialTemplate.steps, initialConfig),
   selectedStepId: initialTemplate.steps[0].id,
@@ -227,8 +255,15 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
   simulationStatusText: '',
 
   setLanguage: (lang: Language) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('sap_simulator_lang', lang);
+      } catch {
+        // ignore
+      }
+    }
     const currentTmpl = get().currentTemplate;
-    const allTemplates = [...getProcessTemplates(lang), ...get().customTemplates];
+    const allTemplates = mergeTemplates(getProcessTemplates(lang), get().customTemplates);
     const matchedTmpl = allTemplates.find((t) => t.id === currentTmpl.id) || allTemplates[0];
 
     // Vorhandene Konfigurationen der Schritte (Archetyp, Konfidenz) beibehalten
@@ -270,7 +305,7 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
   selectTemplate: (templateId: string) => {
     if (simulationTimer) clearInterval(simulationTimer);
     const lang = get().language;
-    const allTemplates = [...getProcessTemplates(lang), ...get().customTemplates];
+    const allTemplates = mergeTemplates(getProcessTemplates(lang), get().customTemplates);
     const template = allTemplates.find((t) => t.id === templateId) || allTemplates[0];
     const enrichedSteps = enrichStepsWithSapAgents(template.steps, get().config.monthlyVolume, lang);
     const newMetrics = calculateOverallMetrics(enrichedSteps, get().config);
@@ -283,7 +318,6 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       null,
       lang
     );
-    // Auto-Select ersten KI-Schritt (Schritt 2 falls vorhanden, sonst Schritt 1)
     const initialSelectedStep = template.steps.length > 1 ? template.steps[1].id : template.steps[0]?.id;
     set({
       currentTemplate: template,
@@ -307,10 +341,27 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
   addCustomTemplate: (template: ProcessTemplate) => {
     if (simulationTimer) clearInterval(simulationTimer);
     const lang = get().language;
-    const newCustomTemplates = [...get().customTemplates, template];
-    const newMetrics = calculateOverallMetrics(template.steps, get().config);
+    const currentCustom = get().customTemplates;
+    const existingIndex = currentCustom.findIndex(
+      (t) => t.id === template.id || (t.scopeCode === template.scopeCode && t.name === template.name)
+    );
+
+    let newCustomTemplates: ProcessTemplate[];
+    const builtIns = getProcessTemplates(lang);
+    const isBuiltIn = builtIns.some((t) => t.id === template.id);
+    const wasOverwritten = existingIndex >= 0 || isBuiltIn;
+
+    if (existingIndex >= 0) {
+      newCustomTemplates = [...currentCustom];
+      newCustomTemplates[existingIndex] = template;
+    } else {
+      newCustomTemplates = [...currentCustom, template];
+    }
+
+    const enrichedSteps = enrichStepsWithSapAgents(template.steps, get().config.monthlyVolume, lang);
+    const newMetrics = calculateOverallMetrics(enrichedSteps, get().config);
     const newDryRun = DryRunEngine.execute(
-      template.steps,
+      enrichedSteps,
       template.id,
       get().selectedMessageQuality,
       null,
@@ -318,12 +369,13 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       null,
       lang
     );
+    const initialSelectedStep = template.steps.length > 1 ? template.steps[1].id : template.steps[0]?.id;
     set({
       customTemplates: newCustomTemplates,
       currentTemplate: template,
-      steps: template.steps,
+      steps: enrichedSteps,
       metrics: newMetrics,
-      selectedStepId: template.steps[0]?.id || null,
+      selectedStepId: initialSelectedStep || null,
       customMessageText: null,
       customSender: null,
       customSubject: null,
@@ -334,10 +386,13 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       stepDecisions: {},
       isSimulating: false,
       simulationStepIndex: -1,
-      simulationStatusText:
-        lang === 'en'
-          ? `✓ Workflow "${template.name}" created and loaded.`
-          : `✓ Workflow "${template.name}" angelegt und geladen.`,
+      simulationStatusText: wasOverwritten
+        ? (lang === 'en'
+            ? `✓ Workflow "${template.name}" updated (overwritten).`
+            : `✓ Workflow "${template.name}" aktualisiert (überschrieben).`)
+        : (lang === 'en'
+            ? `✓ Workflow "${template.name}" loaded.`
+            : `✓ Workflow "${template.name}" geladen.`),
     });
   },
 
@@ -561,7 +616,7 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       metrics: newMetrics,
       dryRunResult: newDryRun,
       lastParetoResult: result,
-      isParetoModalOpen: false,
+      isParetoModalOpen: true,
       simulationStatusText:
         language === 'en'
           ? '★ Pareto Optimum applied: Maximized straight-through processing (STP) & minimal token consumption.'
@@ -784,7 +839,7 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     if (simulationTimer) clearInterval(simulationTimer);
     const s = get();
     const lang = s.language;
-    const allTemplates = [...getProcessTemplates(lang), ...s.customTemplates];
+    const allTemplates = mergeTemplates(getProcessTemplates(lang), s.customTemplates);
     const baseTemplate = allTemplates.find((t) => t.id === s.currentTemplate.id) || s.currentTemplate;
     const freshSteps = JSON.parse(JSON.stringify(baseTemplate.steps));
     const newMetrics = calculateOverallMetrics(freshSteps, s.config);
@@ -823,7 +878,6 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       get().startSimulation();
     }
   },
-
   applyGeneratedProcess: (title, scopeCode, generatedSteps, monthlyVolume, executiveSummary) => {
     const config = { ...get().config, monthlyVolume };
     const enrichedSteps = enrichStepsWithSapAgents(generatedSteps, monthlyVolume, get().language);
