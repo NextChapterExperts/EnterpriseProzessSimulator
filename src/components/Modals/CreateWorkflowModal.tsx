@@ -88,7 +88,7 @@ export const CreateWorkflowModal: React.FC<CreateWorkflowModalProps> = ({
         name: s.name || `Schritt ${idx + 1}`,
         oodaPhase: s.oodaPhase || 'Observe',
         primitive: s.primitive || 'Filter / Gatekeeper',
-        currentArchetype: s.currentArchetype || 'deterministic',
+        currentArchetype: 'deterministic',
         confidenceGate: typeof s.confidenceGate === 'number' ? s.confidenceGate : 90,
         cleanCoreIndex: s.cleanCoreIndex || 'COMPLIANT',
         reversibility: s.reversibility || 1,

@@ -307,7 +307,11 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     const lang = get().language;
     const allTemplates = mergeTemplates(getProcessTemplates(lang), get().customTemplates);
     const template = allTemplates.find((t) => t.id === templateId) || allTemplates[0];
-    const enrichedSteps = enrichStepsWithSapAgents(template.steps, get().config.monthlyVolume, lang);
+    const deterministicSteps = template.steps.map((s) => ({
+      ...s,
+      currentArchetype: 'deterministic' as const,
+    }));
+    const enrichedSteps = enrichStepsWithSapAgents(deterministicSteps, get().config.monthlyVolume, lang);
     const newMetrics = calculateOverallMetrics(enrichedSteps, get().config);
     const newDryRun = DryRunEngine.execute(
       enrichedSteps,
@@ -320,7 +324,7 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     );
     const initialSelectedStep = template.steps.length > 1 ? template.steps[1].id : template.steps[0]?.id;
     set({
-      currentTemplate: template,
+      currentTemplate: { ...template, steps: deterministicSteps },
       steps: enrichedSteps,
       metrics: newMetrics,
       selectedStepId: initialSelectedStep || null,
@@ -342,6 +346,15 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     if (simulationTimer) clearInterval(simulationTimer);
     const lang = get().language;
     const currentCustom = get().customTemplates;
+    const deterministicSteps = template.steps.map((s) => ({
+      ...s,
+      currentArchetype: 'deterministic' as const,
+    }));
+    const deterministicTemplate: ProcessTemplate = {
+      ...template,
+      steps: deterministicSteps,
+    };
+
     const existingIndex = currentCustom.findIndex(
       (t) => t.id === template.id || (t.scopeCode === template.scopeCode && t.name === template.name)
     );
@@ -353,16 +366,16 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
 
     if (existingIndex >= 0) {
       newCustomTemplates = [...currentCustom];
-      newCustomTemplates[existingIndex] = template;
+      newCustomTemplates[existingIndex] = deterministicTemplate;
     } else {
-      newCustomTemplates = [...currentCustom, template];
+      newCustomTemplates = [...currentCustom, deterministicTemplate];
     }
 
-    const enrichedSteps = enrichStepsWithSapAgents(template.steps, get().config.monthlyVolume, lang);
+    const enrichedSteps = enrichStepsWithSapAgents(deterministicSteps, get().config.monthlyVolume, lang);
     const newMetrics = calculateOverallMetrics(enrichedSteps, get().config);
     const newDryRun = DryRunEngine.execute(
       enrichedSteps,
-      template.id,
+      deterministicTemplate.id,
       get().selectedMessageQuality,
       null,
       null,
@@ -372,7 +385,7 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     const initialSelectedStep = template.steps.length > 1 ? template.steps[1].id : template.steps[0]?.id;
     set({
       customTemplates: newCustomTemplates,
-      currentTemplate: template,
+      currentTemplate: deterministicTemplate,
       steps: enrichedSteps,
       metrics: newMetrics,
       selectedStepId: initialSelectedStep || null,

@@ -68,9 +68,31 @@ Diese Roadmap visualisiert den strategischen Entwicklungsplan, bereits abgeschlo
 
 ---
 
+### Meilenstein 6 (v1.6): Standardisierter Workflow-Import, Management-Report & Blueprint-Pipeline
+- [x] **JSON-Workflow-Import & Duplikat-Erkennung:** Robustes Laden externer Blueprints (`workflow.json`) mit Prüfung auf Namensidentität und Bestätigung bei Überschreiben.
+- [x] **Management Decision Memo & PDF-Export:** Druckfertige C-Level-Entscheidungsvorlage mit Vorher-Nachher-Vergleich (STP-Sprung, Monats- und Jahresersparnis, Clean Core Index).
+- [x] **Prominente Gesamtsumme für Monatsbelegvolumen:** Ausweisung der Gesamtkosten aller Belege/Monat inklusive Durchschnittspreis pro Vorgang im Report-Footer.
+- [x] **Standardisierte Blueprint-Pipeline (`process-blueprint-architect`):** Automatisierte Ableitung von verständlichem Kunden-Blueprint, unoptimierter Baseline und 4-seitigem Management-PDF mit Mermaid-Sequenzdiagramm.
+
+---
+
 ## 🚀 Geplante Meilensteine (Future Releases)
 
-### Meilenstein 5 (v2.0): Granulares BTP-Pricing & Rollenbezogenes Sizing
+### Meilenstein 7 (v2.0): Didaktische Storytelling-Architektur & Vor-KI-Baseline (3-Akt-Dramaturgie)
+*Ziel: Glasklarer didaktischer und vertrieblicher Spannungsbogen: Spürbarer Schmerz der Vor-KI-Ära, kontrollierte Erkundung und architektonisch begründetes Pareto-Optimum.*
+- [ ] **Standard-Templates auf Vor-KI-Baseline eichen:**
+  - Initialer Startzustand aller ausgelieferten Standardprozesse (BD9, 2F1, J60) und neu geladener Blueprints als klassischer, unoptimierter SAP-Ist-Zustand ohne moderne GenAI.
+  - Abbildung des klassischen Human-in-the-Loop der Vor-KI-Welt: Hoher manueller Klärungsaufwand durch starre OCR und fehlertoleranzlose Tabellensuchen (SAP Business Workplace, FEBAN, VIM).
+  - Realistische Baseline-Kennzahlen: Niedrige Dunkelverarbeitungsquote (15–30 %), hohe manuelle Sachbearbeiterkosten und lange Liegezeiten.
+- [ ] **Didaktischer 3-Akt-Bogen (Storytelling-Leitfaden für Lehre & C-Level):**
+  - *Akt 1 (Der Status Quo):* Schmerzpunkt- und Kostenanalyse des heutigen, manuell geprägten Prozesses.
+  - *Akt 2 (Die naive KI-Euphorie):* Simulation einer unbedachten Vollautomatisierung („Alles auf Agentic/Autopilot“) deckt Risiken auf: Halluzinationen bei Orient, GoBD/SOX-Compliance-Bruch bei Act (Blast Radius ≥ 4), explodierende Tokenkosten.
+  - *Akt 3 (Die architektonische Vernunft):* Pareto-Optimum als fundierte Architekturentscheidung (gezielte KI bei unstrukturierten Daten, deterministische Regeln in BRFplus, atomare Verbuchung via Clean Core RAP APIs).
+- [ ] **Architektonische Entscheidungsbegründung im Management Report:**
+  - Explizite Ausweisung von Begründungsnotizen je Prozessschritt im Report (z. B. *„Warum Copilot statt Agentic: Blast Radius 4 erfordert GoBD-Revisionssicherheit“*).
+  - Bereitstellung eines praxisnahen Moderationsleitfadens für Hochschul-Vorlesungen und Lenkungsausschuss-Workshops.
+
+### Meilenstein 8 (v2.1): Granulares BTP-Pricing & Rollenbezogenes Sizing
 *Ziel: Fundierte, reale Kostenkalkulation nach offiziellen SAP Preismodellen.*
 - [ ] **SAP Capacity Unit (CU) & AI Unit Konfigurator:**
   - Konfigurierbare Preise für BTP AI Units (LLM Tokens per 1k Input/Output) und BTP Document Information Extraction (DOX) pro Seite.
@@ -79,17 +101,13 @@ Diese Roadmap visualisiert den strategischen Entwicklungsplan, bereits abgeschlo
 - [ ] **Break-Even & ROI Rechner:**
   - Visualisierung des Amortisationszeitpunkts für Clean Core Refactoring vs. Legacy-Betrieb.
 
-### Meilenstein 6 (v2.1): Workflow-Export, Import & SAP Signavio Brücke
+### Meilenstein 9 (v2.2): SAP Signavio BPMN 2.0 Brücke
 *Ziel: Interoperabilität und kollaborativer Austausch von Prozessmodellen.*
-- [ ] **JSON/YAML Import & Export:**
-  - Speichern, Teilen und Laden von selbst erstellten Workflows als strukturierte Dateien.
 - [ ] **BPMN 2.0 / SAP Signavio Parser:**
   - Automatischer Import von Standard-BPMN-XML aus SAP Signavio Process Manager.
   - Automatisches Mapping von BPMN-Tasks auf OODA-Phasen und Primitives.
-- [ ] **PDF-Management-Report Export:**
-  - Export druckfertiger Architektur-Entscheidungsvorlagen für Lenkungsausschüsse und Enterprise Architects.
 
-### Meilenstein 7 (v2.2): SAP BTP AI Core & Joule Live-Bridge
+### Meilenstein 10 (v2.3): SAP BTP AI Core & Joule Live-Bridge
 *Ziel: Optionale Anbindung realer SAP-Services zur Live-Validierung.*
 - [ ] **BTP AI Core Verbindung:**
   - Optionaler API-Key-Modus für Live-Extraktion über SAP DOX oder GenAI Hub (z. B. Claude 3.5 Sonnet / GPT-4o über BTP).
@@ -98,7 +116,7 @@ Diese Roadmap visualisiert den strategischen Entwicklungsplan, bereits abgeschlo
 - [ ] **Joule Prompt Preview:**
   - Automatische Generierung der passenden SAP Joule Copilot Prompt-Vorlagen für Schritte mit HITL.
 
-### Meilenstein 8 (v2.3): Monte-Carlo Simulation & Stresstest-Generator
+### Meilenstein 11 (v2.4): Monte-Carlo Simulation & Stresstest-Generator
 *Ziel: Statistische Absicherung vor Produktivstart.*
 - [ ] **Monte-Carlo Rausch-Simulation:**
   - Tausendfacher Durchlauf mit variablen Rauschmustern zur Ermittlung statistischer Ausfallwahrscheinlichkeiten.

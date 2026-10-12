@@ -50,13 +50,13 @@ export const BlueprintModal: React.FC = () => {
         colLatency: 'Latency',
         colCost: 'Cost/mo',
         level: 'Level',
-        deltaTitle: 'Before & After Transformation (Baseline vs. Pareto Target Architecture)',
+        deltaTitle: 'Before & After Transformation (Pre-AI Baseline vs. Pareto Target Architecture)',
         deltaStp: 'Straight-Through Processing',
         deltaTca: 'Process Cost / Month',
         deltaSavings: 'Annual Savings Potential',
         deltaCleanCore: 'Clean Core Score',
-        noParetoNotice: 'Tip for client workshops: Click "Pareto-Optimum" in the top bar to activate the before/after delta and annual savings calculation.',
-        roadmapTitle: 'Step-by-Step Transformation Roadmap',
+        noParetoNotice: 'Status Quo (Pre-AI Baseline): The process currently runs 100% deterministically with traditional manual human-in-the-loop review overhead. Click "Pareto-Optimum" in the top bar to calculate the target architecture, before/after delta, annual savings, and enterprise guardrails.',
+        roadmapTitle: 'Architectural Transformation Justification per Step',
         recTitle: 'Enterprise Architecture & Governance Recommendation (SAP BTP Clean Core)',
         nextStepsTitle: 'Recommended Next Implementation Steps',
         stepsList: [
@@ -102,13 +102,13 @@ export const BlueprintModal: React.FC = () => {
         colLatency: 'Latenz',
         colCost: 'Kosten/M',
         level: 'Stufe',
-        deltaTitle: 'Vorher-Nachher-Transformation (Ist-Zustand vs. Pareto-Zielarchitektur)',
+        deltaTitle: 'Vorher-Nachher-Transformation (Vor-KI Baseline vs. Pareto-Zielarchitektur)',
         deltaStp: 'Dunkelverarbeitung (STP)',
         deltaTca: 'Prozesskosten / Monat',
         deltaSavings: 'Jährliches Einsparpotenzial',
         deltaCleanCore: 'Clean Core Index',
-        noParetoNotice: 'Hinweis für Kunden-Workshops: Führen Sie über die Schaltfläche „Pareto-Optimum“ eine Optimierung durch, um den Vorher-Nachher-Vergleich und die Jahresersparnis im Report zu aktivieren.',
-        roadmapTitle: 'Schritt-für-Schritt Transformations-Roadmap',
+        noParetoNotice: 'Status Quo (Vor-KI Baseline): Der Prozess läuft aktuell zu 100 % deterministisch mit klassischem manuellem Klärungsaufwand (Human-in-the-Loop). Führen Sie über die Schaltfläche „Pareto-Optimum“ eine Optimierung durch, um den Vorher-Nachher-Vergleich, das Einsparpotenzial und die architektonischen Schutzplanken im Report zu aktivieren.',
+        roadmapTitle: 'Architektonische Transformations-Begründung je Schritt',
         recTitle: 'Enterprise-Architektur & Governance-Empfehlung (SAP BTP Clean Core)',
         nextStepsTitle: 'Empfohlene nächste Umsetzungsschritte für den Lenkungsausschuss',
         stepsList: [
@@ -267,11 +267,11 @@ export const BlueprintModal: React.FC = () => {
                   <table className="w-full text-left font-mono text-[10.5px]">
                     <thead className="bg-slate-100 dark:bg-slate-900 print:bg-slate-200 text-slate-600 dark:text-slate-400 print:text-slate-700 text-[9.5px] uppercase font-bold">
                       <tr>
-                        <th className={thClass}>Schritt</th>
-                        <th className={thClass}>Ist-Archetyp</th>
-                        <th className={thClass}>Ziel-Archetyp (Pareto)</th>
-                        <th className={thClass}>Konfidenz</th>
-                        <th className={thClass}>Architektur-Begründung</th>
+                        <th className={thClass}>{isEn ? 'Step' : 'Schritt'}</th>
+                        <th className={thClass}>{isEn ? 'Baseline (Pre-AI)' : 'Baseline (Vor-KI Ist-Zustand)'}</th>
+                        <th className={thClass}>{isEn ? 'Target (Pareto)' : 'Ziel (Pareto-Optimum)'}</th>
+                        <th className={thClass}>{isEn ? 'Confidence' : 'Konfidenz'}</th>
+                        <th className={thClass}>{isEn ? 'Architectural Justification & Guardrails' : 'Architektur-Begründung & Schutzplanken'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800 print:divide-slate-300">
