@@ -139,6 +139,23 @@ export const BlueprintTab: React.FC = () => {
                 );
               })}
             </tbody>
+            <tfoot className="bg-slate-900/95 print:bg-slate-200 border-t-2 border-emerald-500/60 font-bold text-xs">
+              <tr className="bg-emerald-950/30 print:bg-slate-200">
+                <td colSpan={6} className="p-3 font-sans text-slate-200 print:text-black uppercase text-[11px] tracking-wider">
+                  <div className="flex items-center justify-between pr-3">
+                    <span className="font-bold text-emerald-400 print:text-black text-xs">
+                      Gesamtpreis für alle {config.monthlyVolume.toLocaleString('de-DE')} Vorgänge / Monat
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 print:text-slate-700 font-mono">
+                      Ø {((metrics.totalCostOfAutomationEur || 0) / (config.monthlyVolume || 1)).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € pro Vorgang
+                    </span>
+                  </div>
+                </td>
+                <td className="p-3 text-right font-black font-mono text-base text-emerald-400 print:text-emerald-900">
+                  {Math.round(metrics.totalCostOfAutomationEur).toLocaleString('de-DE')} €
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 

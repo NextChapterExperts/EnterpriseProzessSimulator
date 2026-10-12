@@ -347,22 +347,24 @@ export const BlueprintModal: React.FC = () => {
                     );
                   })}
                 </tbody>
-                <tfoot className="bg-slate-100 dark:bg-slate-900/90 print:bg-slate-200 border-t-2 border-slate-300 dark:border-slate-700 font-bold text-[11px]">
+                <tfoot className="bg-emerald-50/70 dark:bg-emerald-950/40 print:bg-slate-200 border-t-2 border-emerald-500/50 dark:border-emerald-600/60 font-bold text-[11px]">
                   <tr>
-                    <td colSpan={6} className="p-2.5 font-sans text-slate-800 dark:text-slate-200 print:text-black uppercase text-[10px] tracking-wider">
-                      <div className="flex items-center justify-between pr-2">
-                        <span className="font-bold text-slate-900 dark:text-white print:text-black">
-                          {isEn ? `Total Monthly Sizing (${fmt(config.monthlyVolume)} items / month)` : `Gesamtsumme für ${fmt(config.monthlyVolume)} Vorgänge / Monat`}
+                    <td colSpan={6} className="p-3 font-sans text-slate-800 dark:text-slate-200 print:text-black uppercase text-[10.5px] tracking-wider">
+                      <div className="flex items-center justify-between pr-3">
+                        <span className="font-bold text-emerald-800 dark:text-emerald-300 print:text-black text-xs">
+                          {isEn
+                            ? `Total Process Cost for all ${fmt(config.monthlyVolume)} items / month`
+                            : `Gesamtpreis für alle ${fmt(config.monthlyVolume)} Vorgänge / Monat`}
                         </span>
-                        <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 print:text-slate-700 font-mono">
-                          ~{((metrics.totalCostOfAutomationEur || 0) / (config.monthlyVolume || 1)).toFixed(2)} € / Vorgang
+                        <span className="text-[10.5px] font-semibold text-slate-600 dark:text-emerald-400/80 print:text-slate-700 font-mono">
+                          Ø {((metrics.totalCostOfAutomationEur || 0) / (config.monthlyVolume || 1)).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € {isEn ? '/ item' : '/ Vorgang'}
                         </span>
                       </div>
                     </td>
-                    <td className="p-2.5 text-slate-700 dark:text-slate-300 print:text-slate-800 font-mono">
+                    <td className="p-3 text-slate-700 dark:text-slate-300 print:text-slate-800 font-mono">
                       {fmt(steps.reduce((acc, s) => acc + calculateStepMetrics(s, config).latencyMs, 0))} ms
                     </td>
-                    <td className="p-2.5 text-right font-black font-mono text-[13px] text-slate-900 dark:text-white print:text-black">
+                    <td className="p-3 text-right font-black font-mono text-sm text-emerald-700 dark:text-emerald-400 print:text-emerald-900">
                       {fmt(Math.round(metrics.totalCostOfAutomationEur))} €
                     </td>
                   </tr>
